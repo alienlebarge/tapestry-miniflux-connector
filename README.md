@@ -19,18 +19,18 @@ This connector allows you to read your unread articles from any Miniflux instanc
 
 ### Option 1: Direct Installation (Recommended)
 
-1. Download the latest `ch.miniflux.tapestry` file from the [Releases page](../../releases)
+1. Download the latest `ch.alienlebarge.miniflux.tapestry` file from the [Releases page](../../releases)
 2. Save the file to your iPhone/iPad (e.g., in the Files app)
 3. Open **Tapestry** on your device
 4. Go to **Settings** → **Connectors**
 5. Tap **Add a Connector**
-6. Select the `ch.miniflux.tapestry` file you downloaded
+6. Select the `ch.alienlebarge.miniflux.tapestry` file you downloaded
 7. Configure your Miniflux instance details
 
 ### Option 2: Manual Installation (For Developers)
 
 1. Clone or download this repository
-2. Copy the `ch.miniflux` folder to your Tapestry Connectors directory
+2. Copy the `ch.alienlebarge.miniflux` folder to your Tapestry Connectors directory
 3. In Tapestry, add a new connector and select "Miniflux"
 4. Configure your Miniflux instance details
 
@@ -41,7 +41,7 @@ You'll need:
 - Your Miniflux username
 - Your Miniflux password or API token
 
-See the [full documentation](ch.miniflux/README.md) in the connector folder for detailed setup instructions.
+See the [full documentation](ch.alienlebarge.miniflux/README.md) in the connector folder for detailed setup instructions.
 
 ## Project Structure
 
@@ -50,7 +50,7 @@ tapestry-miniflux-connector/
 ├── .github/
 │   └── workflows/
 │       └── release.yml        # Automated release workflow
-├── ch.miniflux/
+├── ch.alienlebarge.miniflux/
 │   ├── plugin-config.json    # Connector metadata
 │   ├── ui-config.json         # User configuration interface
 │   ├── plugin.js              # Main connector logic
@@ -60,7 +60,7 @@ tapestry-miniflux-connector/
 └── README.md                  # This file
 ```
 
-**Note:** The `ch.miniflux.tapestry` package file is automatically generated during releases and is not tracked in the repository.
+**Note:** The `ch.alienlebarge.miniflux.tapestry` package file is automatically generated during releases and is not tracked in the repository.
 
 ## Resources
 
@@ -90,14 +90,14 @@ This project uses GitHub Actions to automatically build and publish the `.tapest
 2. Create a release on GitHub using the tag
 
 3. The workflow will automatically:
-   - Build the `ch.miniflux.tapestry` package
+   - Build the `ch.alienlebarge.miniflux.tapestry` package
    - Attach it to the release as a downloadable asset
 
 **Manual package creation (if needed):**
 
 ```bash
-cd ch.miniflux
-zip -r ../ch.miniflux.tapestry .
+cd ch.alienlebarge.miniflux
+zip -r ../ch.alienlebarge.miniflux.tapestry .
 ```
 
 ## Contributing
