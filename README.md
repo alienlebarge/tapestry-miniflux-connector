@@ -47,16 +47,20 @@ See the [full documentation](ch.miniflux/README.md) in the connector folder for 
 
 ```
 tapestry-miniflux-connector/
+├── .github/
+│   └── workflows/
+│       └── release.yml        # Automated release workflow
 ├── ch.miniflux/
 │   ├── plugin-config.json    # Connector metadata
 │   ├── ui-config.json         # User configuration interface
 │   ├── plugin.js              # Main connector logic
 │   ├── actions.json           # Available actions (mark as read)
 │   └── README.md              # Detailed documentation
-├── ch.miniflux.tapestry       # Packaged connector for installation
 ├── LICENSE                    # MIT License
 └── README.md                  # This file
 ```
+
+**Note:** The `ch.miniflux.tapestry` package file is automatically generated during releases and is not tracked in the repository.
 
 ## Resources
 
@@ -68,6 +72,33 @@ tapestry-miniflux-connector/
 ## License
 
 MIT License - See LICENSE file for details
+
+## Development
+
+### Release Process
+
+This project uses GitHub Actions to automatically build and publish the `.tapestry` package file when a new release is created.
+
+**To create a new release:**
+
+1. Create and push a new tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+2. Create a release on GitHub using the tag
+
+3. The workflow will automatically:
+   - Build the `ch.miniflux.tapestry` package
+   - Attach it to the release as a downloadable asset
+
+**Manual package creation (if needed):**
+
+```bash
+cd ch.miniflux
+zip -r ../ch.miniflux.tapestry .
+```
 
 ## Contributing
 
