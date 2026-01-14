@@ -144,21 +144,14 @@ function handleError(error) {
  */
 function verify() {
     console.log("Verifying Miniflux connection...");
+    console.log("Site: " + (site || "(empty)"));
+    console.log("Username: " + (username || "(empty)"));
+    console.log("Password: " + (password ? "(provided)" : "(empty)"));
 
-    // Validate required fields - but don't call processError for missing fields
-    // as verify() may be called before all fields are filled (especially on iOS)
-    if (!site || site.trim() === "") {
-        console.log("Site URL is not filled yet");
-        return Promise.resolve();
-    }
-
-    if (!username || username.trim() === "") {
-        console.log("Username is not filled yet");
-        return Promise.resolve();
-    }
-
-    if (!password || password.trim() === "") {
-        console.log("Password is not filled yet");
+    // Skip verification if critical fields are missing
+    // On iOS, verify() may be called as user types, so we return early without signaling
+    if (!site || !username || !password) {
+        console.log("Skipping verification - fields not yet complete");
         return Promise.resolve();
     }
 

@@ -4,7 +4,6 @@
       "name": "site",
       "type": "url",
       "prompt": "Miniflux Instance URL",
-      "validate_as": "url",
       "placeholder": "https://your-instance.miniflux.app"
     },
     {
