@@ -27,7 +27,7 @@
       "name": "limit",
       "type": "number",
       "prompt": "Number of articles to fetch",
-      "default": 50
+      "value": "50"
     }
   ]
 }

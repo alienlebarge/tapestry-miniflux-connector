@@ -145,6 +145,22 @@ function handleError(error) {
 function verify() {
     console.log("Verifying Miniflux connection...");
 
+    // Validate required fields
+    if (!site || site.trim() === "") {
+        processError("Please enter your Miniflux instance URL");
+        return Promise.reject(new Error("Site URL is required"));
+    }
+
+    if (!username || username.trim() === "") {
+        processError("Please enter your username");
+        return Promise.reject(new Error("Username is required"));
+    }
+
+    if (!password || password.trim() === "") {
+        processError("Please enter your password or API token");
+        return Promise.reject(new Error("Password is required"));
+    }
+
     // Build the URL to test authentication (using /v1/me endpoint)
     const baseUrl = site.replace(/\/$/, "");
     const verifyUrl = baseUrl + "/v1/me";
@@ -156,10 +172,38 @@ function verify() {
     })
     .then(function(response) {
         console.log("Authentication successful!");
+
+        // Parse response to get user info
+        const userData = JSON.parse(response.body);
+        const displayName = userData.username ? "Miniflux (" + userData.username + ")" : "Miniflux Feed";
+
+        // Signal successful verification to Tapestry
+        processVerification({
+            displayName: displayName
+        });
+
         return response;
     })
     .catch(function(error) {
-        handleError(error);
+        console.log("Verification failed: " + error.message);
+
+        // Provide user-friendly error messages
+        let errorMessage = "Failed to connect to Miniflux";
+
+        if (error.message.includes("401")) {
+            errorMessage = "Authentication failed. Please check your username and password.";
+        } else if (error.message.includes("404")) {
+            errorMessage = "Miniflux instance not found. Please check your instance URL.";
+        } else if (error.message.includes("timeout")) {
+            errorMessage = "Request timeout. Please check your internet connection.";
+        } else if (error.message) {
+            errorMessage = "Connection error: " + error.message;
+        }
+
+        // Signal error to Tapestry
+        processError(errorMessage);
+
+        return Promise.reject(error);
     });
 }
 
