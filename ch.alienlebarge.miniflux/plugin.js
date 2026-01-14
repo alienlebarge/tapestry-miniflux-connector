@@ -145,20 +145,21 @@ function handleError(error) {
 function verify() {
     console.log("Verifying Miniflux connection...");
 
-    // Validate required fields
+    // Validate required fields - but don't call processError for missing fields
+    // as verify() may be called before all fields are filled (especially on iOS)
     if (!site || site.trim() === "") {
-        processError("Please enter your Miniflux instance URL");
-        return Promise.reject(new Error("Site URL is required"));
+        console.log("Site URL is not filled yet");
+        return Promise.resolve();
     }
 
     if (!username || username.trim() === "") {
-        processError("Please enter your username");
-        return Promise.reject(new Error("Username is required"));
+        console.log("Username is not filled yet");
+        return Promise.resolve();
     }
 
     if (!password || password.trim() === "") {
-        processError("Please enter your password or API token");
-        return Promise.reject(new Error("Password is required"));
+        console.log("Password is not filled yet");
+        return Promise.resolve();
     }
 
     // Build the URL to test authentication (using /v1/me endpoint)
