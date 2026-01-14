@@ -41,3 +41,6 @@ yarn-error.log*
 .env.local
 .env.test
 test-credentials.json
+
+# Build artifacts
+*.tapestry

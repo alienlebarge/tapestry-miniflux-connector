@@ -47,16 +47,20 @@ See the [full documentation](ch.miniflux/README.md) in the connector folder for 
 
 ```
 tapestry-miniflux-connector/
+├── .github/
+│   └── workflows/
+│       └── release.yml        # Automated release workflow
 ├── ch.miniflux/
 │   ├── plugin-config.json    # Connector metadata
 │   ├── ui-config.json         # User configuration interface
 │   ├── plugin.js              # Main connector logic
 │   ├── actions.json           # Available actions (mark as read)
 │   └── README.md              # Detailed documentation
-├── ch.miniflux.tapestry       # Packaged connector for installation
 ├── LICENSE                    # MIT License
 └── README.md                  # This file
 ```
+
+**Note:** The `ch.miniflux.tapestry` package file is automatically generated during releases and is not tracked in the repository.
 
 ## Resources
 
