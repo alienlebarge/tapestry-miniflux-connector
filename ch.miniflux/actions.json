@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "id": "mark_as_read",
+      "display_name": "Mark as Read",
+      "icon": "checkmark.circle",
+      "destructive": false
+    }
+  ]
+}

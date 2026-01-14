@@ -1,0 +1,33 @@
+{
+  "inputs": [
+    {
+      "name": "site",
+      "type": "url",
+      "prompt": "Miniflux Instance URL",
+      "validate_as": "url",
+      "placeholder": "https://your-instance.miniflux.app"
+    },
+    {
+      "name": "username",
+      "type": "text",
+      "prompt": "Username"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "prompt": "Password or API Token"
+    },
+    {
+      "name": "category_filter",
+      "type": "text",
+      "prompt": "Category IDs (optional, comma-separated)",
+      "placeholder": "1,5,8"
+    },
+    {
+      "name": "limit",
+      "type": "number",
+      "prompt": "Number of articles to fetch",
+      "default": 50
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "ch.miniflux",
+  "display_name": "Miniflux",
+  "needs_verification": true,
+  "check_interval": 300,
+  "provides_attachments": false
+}
