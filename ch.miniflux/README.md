@@ -18,6 +18,19 @@ Read your unread articles from Miniflux directly in your Tapestry timeline.
 
 ## Installation
 
+### Quick Installation (Recommended)
+
+If you have the `ch.miniflux.tapestry` file:
+
+1. Save the file to your iPhone/iPad (e.g., in the Files app)
+2. Open **Tapestry** on your device
+3. Go to **Settings** → **Connectors**
+4. Tap **Add a Connector**
+5. Select the `ch.miniflux.tapestry` file
+6. Configure your Miniflux instance details
+
+### Manual Installation (For Development)
+
 1. Download or clone this repository
 2. Copy the `ch.miniflux` folder to your Tapestry Connectors directory
 3. In Tapestry, go to Settings > Connectors

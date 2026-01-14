@@ -17,6 +17,18 @@ This connector allows you to read your unread articles from any Miniflux instanc
 
 ## Installation
 
+### Option 1: Direct Installation (Recommended)
+
+1. Download the latest `ch.miniflux.tapestry` file from the [Releases page](../../releases)
+2. Save the file to your iPhone/iPad (e.g., in the Files app)
+3. Open **Tapestry** on your device
+4. Go to **Settings** → **Connectors**
+5. Tap **Add a Connector**
+6. Select the `ch.miniflux.tapestry` file you downloaded
+7. Configure your Miniflux instance details
+
+### Option 2: Manual Installation (For Developers)
+
 1. Clone or download this repository
 2. Copy the `ch.miniflux` folder to your Tapestry Connectors directory
 3. In Tapestry, add a new connector and select "Miniflux"
@@ -41,6 +53,8 @@ tapestry-miniflux-connector/
 │   ├── plugin.js              # Main connector logic
 │   ├── actions.json           # Available actions (mark as read)
 │   └── README.md              # Detailed documentation
+├── ch.miniflux.tapestry       # Packaged connector for installation
+├── LICENSE                    # MIT License
 └── README.md                  # This file
 ```
 
