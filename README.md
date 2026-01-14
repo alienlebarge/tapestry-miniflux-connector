@@ -69,6 +69,33 @@ tapestry-miniflux-connector/
 
 MIT License - See LICENSE file for details
 
+## Development
+
+### Release Process
+
+This project uses GitHub Actions to automatically build and publish the `.tapestry` package file when a new release is created.
+
+**To create a new release:**
+
+1. Create and push a new tag:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+2. Create a release on GitHub using the tag
+
+3. The workflow will automatically:
+   - Build the `ch.miniflux.tapestry` package
+   - Attach it to the release as a downloadable asset
+
+**Manual package creation (if needed):**
+
+```bash
+cd ch.miniflux
+zip -r ../ch.miniflux.tapestry .
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
