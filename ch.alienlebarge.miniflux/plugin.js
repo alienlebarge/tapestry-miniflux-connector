@@ -38,12 +38,12 @@ function buildEntriesUrl() {
     var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
     // Add time filter to improve performance with large unread counts
-    // Only fetch articles from the last 1 day
-    var oneDayAgo = Math.floor(Date.now() / 1000) - (1 * 24 * 60 * 60);
-    url += "&published_after=" + oneDayAgo;
+    // Only fetch articles from the last 1 month
+    var oneMonthAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
+    url += "&published_after=" + oneMonthAgo;
 
-    // Add limit parameter (default to 10 if not specified)
-    var articleLimit = limit || 10;
+    // Add limit parameter (default to 50 if not specified)
+    var articleLimit = limit || 50;
     url += "&limit=" + articleLimit;
 
     return url;
