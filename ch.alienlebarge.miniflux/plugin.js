@@ -69,6 +69,20 @@ function convertEntryToItem(entry) {
     item.title = entry.title;
     item.body = entry.content; // HTML content from Miniflux
 
+    // Add source feed information
+    if (entry.feed && entry.feed.title) {
+        var sourceObj = {
+            name: entry.feed.title
+        };
+
+        // Only add URI if it exists and is not undefined
+        if (entry.feed.site_url) {
+            sourceObj.uri = entry.feed.site_url;
+        }
+
+        item.source = sourceObj;
+    }
+
     return item;
 }
 
