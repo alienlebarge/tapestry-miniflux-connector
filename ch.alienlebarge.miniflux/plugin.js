@@ -72,11 +72,17 @@ function convertEntryToItem(entry) {
     }
 
     // Add source feed information
-    if (entry.feed) {
-        item.source = {
-            name: entry.feed.title,
-            uri: entry.feed.site_url
+    if (entry.feed && entry.feed.title) {
+        var sourceObj = {
+            name: entry.feed.title
         };
+
+        // Only add URI if it exists and is not undefined
+        if (entry.feed.site_url) {
+            sourceObj.uri = entry.feed.site_url;
+        }
+
+        item.source = sourceObj;
 
         // Add category if available
         if (entry.feed.category && entry.feed.category.title) {
@@ -143,15 +149,12 @@ function verify() {
     var verifyUrl = baseUrl + "/v1/me";
 
     // Make a request to verify credentials
-    return sendRequest(verifyUrl, {
-        method: "GET",
-        headers: getAuthHeaders()
-    })
+    return sendRequest(verifyUrl, "GET", null, getAuthHeaders())
     .then(function(response) {
         console.log("Authentication successful!");
 
-        // Parse response to get user info
-        var userData = JSON.parse(response.body);
+        // Parse response to get user info (response is the body string directly)
+        var userData = JSON.parse(response);
         var displayName = userData.username ? "Miniflux (" + userData.username + ")" : "Miniflux Feed";
 
         // Signal successful verification to Tapestry
@@ -194,36 +197,15 @@ function verify() {
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
-    console.log("Site: " + (site || "(empty)"));
-    console.log("API Token: " + (apiToken ? "(provided)" : "(empty)"));
 
-    // Check if required fields are present
-    if (!site || !apiToken) {
-        var missingFields = [];
-        if (!site) missingFields.push("Site");
-        if (!apiToken) missingFields.push("API Token");
-
-        var errorMsg = "Missing required configuration: " + missingFields.join(", ");
-        console.log(errorMsg);
-        throw new Error(errorMsg);
-    }
-
-    // Build the API URL
     var url = buildEntriesUrl();
     console.log("Fetching from: " + url);
 
-    // Make the request
-    return sendRequest(url, {
-        method: "GET",
-        headers: getAuthHeaders()
-    })
+    return sendRequest(url, "GET", null, getAuthHeaders())
     .then(function(response) {
-        // Parse the JSON response
-        var data = JSON.parse(response.body);
-
+        var data = JSON.parse(response);
         console.log("Received " + data.total + " unread articles");
 
-        // Convert each entry to a Tapestry Item
         var items = [];
         if (data.entries && data.entries.length > 0) {
             for (var i = 0; i < data.entries.length; i++) {
@@ -235,9 +217,6 @@ function load() {
 
         console.log("Converted " + items.length + " items");
         return items;
-    })
-    .catch(function(error) {
-        handleError(error);
     });
 }
 
@@ -266,17 +245,13 @@ function performAction(actionId, actionValue, item) {
     var updateUrl = baseUrl + "/v1/entries";
 
     // Prepare the request body
-    var requestBody = JSON.stringify({
+    var requestBody = {
         entry_ids: [parseInt(actionValue)],
         status: "read"
-    });
+    };
 
     // Make the request to mark the entry as read
-    return sendRequest(updateUrl, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: requestBody
-    })
+    return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
     .then(function(response) {
         console.log("Article marked as read successfully");
         return response;
