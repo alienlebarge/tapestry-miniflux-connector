@@ -65,42 +65,8 @@ function convertEntryToItem(entry) {
     // Create the Tapestry Item
     var item = Item.createWithUriDate(uri, date);
 
-    // Set basic properties
+    // Set only title for performance testing
     item.title = entry.title;
-    // Temporarily disable body content to test performance
-    // item.body = entry.content; // HTML content from Miniflux
-
-    // Set author if available
-    if (entry.author && entry.author.trim() !== "") {
-        item.author = {
-            name: entry.author
-        };
-    }
-
-    // Add source feed information
-    if (entry.feed && entry.feed.title) {
-        var sourceObj = {
-            name: entry.feed.title
-        };
-
-        // Only add URI if it exists and is not undefined
-        if (entry.feed.site_url) {
-            sourceObj.uri = entry.feed.site_url;
-        }
-
-        item.source = sourceObj;
-
-        // Add category if available
-        if (entry.feed.category && entry.feed.category.title) {
-            item.category = entry.feed.category.title;
-        }
-    }
-
-    // Add action for marking as read (if entry is unread)
-    if (entry.status === "unread") {
-        item.action = "mark_as_read";
-        item.actionValue = entry.id.toString();
-    }
 
     return item;
 }
