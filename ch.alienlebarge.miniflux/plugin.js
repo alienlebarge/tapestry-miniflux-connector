@@ -143,10 +143,7 @@ function verify() {
     var verifyUrl = baseUrl + "/v1/me";
 
     // Make a request to verify credentials
-    return sendRequest(verifyUrl, {
-        method: "GET",
-        headers: getAuthHeaders()
-    })
+    return sendRequest(verifyUrl, "GET", null, getAuthHeaders())
     .then(function(response) {
         console.log("Authentication successful!");
 
@@ -213,10 +210,7 @@ function load() {
     console.log("Fetching from: " + url);
 
     // Make the request
-    return sendRequest(url, {
-        method: "GET",
-        headers: getAuthHeaders()
-    })
+    return sendRequest(url, "GET", null, getAuthHeaders())
     .then(function(response) {
         // Parse the JSON response
         var data = JSON.parse(response.body);
@@ -266,17 +260,13 @@ function performAction(actionId, actionValue, item) {
     var updateUrl = baseUrl + "/v1/entries";
 
     // Prepare the request body
-    var requestBody = JSON.stringify({
+    var requestBody = {
         entry_ids: [parseInt(actionValue)],
         status: "read"
-    });
+    };
 
     // Make the request to mark the entry as read
-    return sendRequest(updateUrl, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: requestBody
-    })
+    return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
     .then(function(response) {
         console.log("Article marked as read successfully");
         return response;
