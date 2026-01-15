@@ -69,6 +69,11 @@ function convertEntryToItem(entry) {
     item.title = entry.title;
     item.body = entry.content; // HTML content from Miniflux
 
+    // Set author if available
+    if (entry.author && entry.author.trim() !== "") {
+        item.author = Identity.createWithName(entry.author);
+    }
+
     // Add source feed information
     if (entry.feed && entry.feed.title) {
         var sourceObj = {
