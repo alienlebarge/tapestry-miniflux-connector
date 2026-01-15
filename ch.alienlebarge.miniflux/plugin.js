@@ -37,6 +37,11 @@ function buildEntriesUrl() {
     // Start with base endpoint
     var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
+    // Add time filter to improve performance with large unread counts
+    // Only fetch articles from the last 30 days
+    var thirtyDaysAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
+    url += "&published_after=" + thirtyDaysAgo;
+
     // Add limit parameter (default to 10 if not specified)
     var articleLimit = limit || 10;
     url += "&limit=" + articleLimit;
