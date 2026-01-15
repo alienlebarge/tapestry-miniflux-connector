@@ -147,8 +147,8 @@ function verify() {
     .then(function(response) {
         console.log("Authentication successful!");
 
-        // Parse response to get user info
-        var userData = JSON.parse(response.body);
+        // Parse response to get user info (response is the body string directly)
+        var userData = JSON.parse(response);
         var displayName = userData.username ? "Miniflux (" + userData.username + ")" : "Miniflux Feed";
 
         // Signal successful verification to Tapestry
@@ -212,8 +212,8 @@ function load() {
     // Make the request
     return sendRequest(url, "GET", null, getAuthHeaders())
     .then(function(response) {
-        // Parse the JSON response
-        var data = JSON.parse(response.body);
+        // Parse the JSON response (response is the body string directly)
+        var data = JSON.parse(response);
 
         console.log("Received " + data.total + " unread articles");
 
