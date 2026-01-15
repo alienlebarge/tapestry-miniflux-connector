@@ -173,7 +173,7 @@ function load() {
     var url = buildEntriesUrl();
     console.log("Fetching from: " + url);
 
-    return sendRequest(url, "GET", null, getAuthHeaders())
+    sendRequest(url, "GET", null, getAuthHeaders())
     .then(function(response) {
         var data = JSON.parse(response);
         console.log("Received " + data.total + " unread articles");
@@ -188,7 +188,12 @@ function load() {
         }
 
         console.log("Converted " + items.length + " items");
-        return items;
+        console.log("Calling processResults with " + items.length + " items");
+        processResults(items);
+    })
+    .catch(function(error) {
+        console.log("Error in load(): " + error);
+        processError("Failed to load articles: " + error);
     });
 }
 
