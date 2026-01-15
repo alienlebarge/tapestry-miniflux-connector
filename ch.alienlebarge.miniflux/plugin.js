@@ -69,9 +69,17 @@ function convertEntryToItem(entry) {
     item.title = entry.title;
     item.body = entry.content; // HTML content from Miniflux
 
-    // Set author if available
-    if (entry.author && entry.author.trim() !== "") {
-        item.author = Identity.createWithName(entry.author);
+    // Set author to feed name with favicon
+    if (entry.feed && entry.feed.title) {
+        var author = Identity.createWithName(entry.feed.title);
+
+        // Add feed favicon as avatar using DuckDuckGo service
+        if (entry.feed.site_url) {
+            var domain = entry.feed.site_url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+            author.avatar = "https://icons.duckduckgo.com/ip3/" + domain + ".ico";
+        }
+
+        item.author = author;
     }
 
     // Add source feed information
