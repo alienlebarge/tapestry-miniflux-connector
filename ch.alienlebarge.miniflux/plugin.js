@@ -198,6 +198,19 @@ function verify() {
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
+    console.log("Site: " + (site || "(empty)"));
+    console.log("API Token: " + (apiToken ? "(provided)" : "(empty)"));
+
+    // Check if required fields are present
+    if (!site || !apiToken) {
+        var missingFields = [];
+        if (!site) missingFields.push("Site");
+        if (!apiToken) missingFields.push("API Token");
+
+        var errorMsg = "Missing required configuration: " + missingFields.join(", ");
+        console.log(errorMsg);
+        throw new Error(errorMsg);
+    }
 
     var url = buildEntriesUrl();
     console.log("Fetching from: " + url);
