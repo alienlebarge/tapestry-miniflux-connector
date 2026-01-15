@@ -42,8 +42,8 @@ function buildEntriesUrl() {
     var oneMonthAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
     url += "&published_after=" + oneMonthAgo;
 
-    // Add limit parameter (default to 50 if not specified)
-    var articleLimit = limit || 50;
+    // Add limit parameter (default to 500 if not specified)
+    var articleLimit = limit || 500;
     url += "&limit=" + articleLimit;
 
     return url;

@@ -11,7 +11,7 @@
       "name": "limit",
       "type": "number",
       "prompt": "Number of articles to fetch",
-      "value": "50"
+      "value": "500"
     }
   ]
 }
