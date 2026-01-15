@@ -76,16 +76,14 @@ function convertEntryToItem(entry) {
 
     // Add source feed information
     if (entry.feed && entry.feed.title) {
-        var sourceObj = {
-            name: entry.feed.title
-        };
+        var source = Identity.createWithName(entry.feed.title);
 
         // Only add URI if it exists and is not undefined
         if (entry.feed.site_url) {
-            sourceObj.uri = entry.feed.site_url;
+            source.uri = entry.feed.site_url;
         }
 
-        item.source = sourceObj;
+        item.source = source;
 
         // Add category if available
         if (entry.feed.category && entry.feed.category.title) {
