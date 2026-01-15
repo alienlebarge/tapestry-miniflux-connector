@@ -81,6 +81,11 @@ function convertEntryToItem(entry) {
         }
 
         item.source = sourceObj;
+
+        // Add category if available
+        if (entry.feed.category && entry.feed.category.title) {
+            item.category = entry.feed.category.title;
+        }
     }
 
     return item;
