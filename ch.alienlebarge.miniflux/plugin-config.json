@@ -1,6 +1,7 @@
 {
   "id": "ch.alienlebarge.miniflux",
   "display_name": "Miniflux",
+  "icon": "https://raw.githubusercontent.com/miniflux/logo/master/icon.svg",
   "site_prompt": "Miniflux Instance URL",
   "site_placeholder": "https://your-instance.miniflux.app",
   "needs_verification": true,
