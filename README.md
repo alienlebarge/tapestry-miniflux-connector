@@ -2,6 +2,11 @@
 
 A Tapestry connector that integrates Miniflux (minimalist RSS reader) into your Tapestry timeline.
 
+## ⚠️ Heads Up
+
+This project is still in development. We don't guarantee anything yet and you use 
+it at your own risk. No guaranteed support, but feel free to report any bugs you find!
+
 ## About
 
 This connector allows you to read your unread articles from any Miniflux instance directly in the Tapestry app. It supports category filtering, customizable article limits, and the ability to mark articles as read without leaving Tapestry.
