@@ -170,9 +170,8 @@ For issues or questions:
 
 ## Version History
 
-### 1.0.0 (2026-01-14)
+### Development (In Progress)
 
-- Initial release
 - X-Auth-Token authentication with API token
 - Fetch unread articles
 - Mark as read action
