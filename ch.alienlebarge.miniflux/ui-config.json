@@ -8,16 +8,10 @@
       "required": true
     },
     {
-      "name": "category_filter",
-      "type": "text",
-      "prompt": "Category IDs (optional, comma-separated)",
-      "placeholder": "1,5,8"
-    },
-    {
       "name": "limit",
       "type": "number",
       "prompt": "Number of articles to fetch",
-      "value": "50"
+      "value": "10"
     }
   ]
 }
