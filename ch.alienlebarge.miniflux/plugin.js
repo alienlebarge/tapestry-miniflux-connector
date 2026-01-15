@@ -244,7 +244,7 @@ function load() {
         }
 
         // Signal to Tapestry that results are ready
-        processResults(items, true);
+        processResults(items);
     })
     .catch(function(error) {
         console.log("Error in load(): " + error.message);
