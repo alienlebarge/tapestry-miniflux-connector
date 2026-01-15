@@ -37,8 +37,8 @@ function buildEntriesUrl() {
     // Start with base endpoint
     var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
-    // Add limit parameter (default to 50 if not specified)
-    var articleLimit = limit || 50;
+    // Add limit parameter (default to 10 if not specified)
+    var articleLimit = limit || 10;
     url += "&limit=" + articleLimit;
 
     return url;
