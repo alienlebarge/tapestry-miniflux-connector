@@ -73,10 +73,10 @@ function convertEntryToItem(entry) {
     if (entry.feed && entry.feed.title) {
         var author = Identity.createWithName(entry.feed.title);
 
-        // Add feed favicon as avatar using Google Favicons service (returns PNG)
+        // Add feed Apple Touch Icon as avatar (high quality PNG)
         if (entry.feed.site_url) {
-            var domain = entry.feed.site_url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-            author.avatar = "https://www.google.com/s2/favicons?domain=" + domain + "&sz=128";
+            var baseUrl = entry.feed.site_url.replace(/\/$/, "");
+            author.avatar = baseUrl + "/apple-touch-icon.png";
         }
 
         item.author = author;
