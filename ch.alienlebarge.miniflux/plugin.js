@@ -69,21 +69,16 @@ function convertEntryToItem(entry) {
     item.title = entry.title;
     item.body = entry.content; // HTML content from Miniflux
 
-    // Set author if available
-    if (entry.author && entry.author.trim() !== "") {
-        item.author = Identity.createWithName(entry.author);
-    }
-
-    // Add source feed information
+    // Set author to feed name (displayed in timeline)
     if (entry.feed && entry.feed.title) {
-        var source = Identity.createWithName(entry.feed.title);
+        var author = Identity.createWithName(entry.feed.title);
 
-        // Only add URI if it exists and is not undefined
+        // Add feed website URL if available
         if (entry.feed.site_url) {
-            source.uri = entry.feed.site_url;
+            author.uri = entry.feed.site_url;
         }
 
-        item.source = source;
+        item.author = author;
 
         // Add category if available
         if (entry.feed.category && entry.feed.category.title) {
