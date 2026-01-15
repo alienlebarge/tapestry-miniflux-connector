@@ -88,6 +88,12 @@ function convertEntryToItem(entry) {
         }
     }
 
+    // Add action for marking as read (if entry is unread)
+    if (entry.status === "unread") {
+        item.action = "mark_as_read";
+        item.actionValue = entry.id.toString();
+    }
+
     return item;
 }
 
