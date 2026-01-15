@@ -1,26 +1,11 @@
 {
   "inputs": [
     {
-      "name": "site",
-      "type": "url",
-      "prompt": "Miniflux Instance URL",
-      "placeholder": "https://your-instance.miniflux.app"
-    },
-    {
-      "name": "username",
+      "name": "apiToken",
       "type": "text",
-      "prompt": "Username"
-    },
-    {
-      "name": "password",
-      "type": "password",
-      "prompt": "Password or API Token"
-    },
-    {
-      "name": "category_filter",
-      "type": "text",
-      "prompt": "Category IDs (optional, comma-separated)",
-      "placeholder": "1,5,8"
+      "prompt": "API Token",
+      "placeholder": "Your Miniflux API token",
+      "required": true
     },
     {
       "name": "limit",

@@ -14,17 +14,13 @@
 
 /**
  * Creates the authentication header for Miniflux API requests
- * Uses HTTP Basic Authentication with username:password encoded in Base64
+ * Uses the X-Auth-Token header with the API token
  *
  * @returns {Object} Headers object with Authorization header
  */
 function getAuthHeaders() {
-    // Encode username:password in Base64 for HTTP Basic Auth
-    const credentials = username + ":" + password;
-    const encodedCredentials = btoa(credentials);
-
     return {
-        "Authorization": "Basic " + encodedCredentials,
+        "X-Auth-Token": apiToken,
         "Content-Type": "application/json"
     };
 }
@@ -32,30 +28,18 @@ function getAuthHeaders() {
 /**
  * Builds the Miniflux API URL for fetching entries
  *
- * @returns {string} Complete API URL with query parameters
+ * @returns {string} Compvare API URL with query parameters
  */
 function buildEntriesUrl() {
     // Remove trailing slash from site URL if present
-    const baseUrl = site.replace(/\/$/, "");
+    var baseUrl = site.replace(/\/$/, "");
 
     // Start with base endpoint
-    let url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
+    var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
     // Add limit parameter (default to 50 if not specified)
-    const articleLimit = limit || 50;
+    var articleLimit = limit || 50;
     url += "&limit=" + articleLimit;
-
-    // Add category filter if specified
-    if (category_filter && category_filter.trim() !== "") {
-        // Split comma-separated category IDs and add each one
-        const categoryIds = category_filter.split(",");
-        for (let i = 0; i < categoryIds.length; i++) {
-            const categoryId = categoryIds[i].trim();
-            if (categoryId) {
-                url += "&category_id=" + categoryId;
-            }
-        }
-    }
 
     return url;
 }
@@ -68,13 +52,13 @@ function buildEntriesUrl() {
  */
 function convertEntryToItem(entry) {
     // Create unique URI for this article (using the article URL and ID)
-    const uri = entry.url + "#" + entry.id;
+    var uri = entry.url + "#" + entry.id;
 
     // Parse the publication date
-    const date = new Date(entry.published_at);
+    var date = new Date(entry.published_at);
 
     // Create the Tapestry Item
-    const item = Item.createWithUriDate(uri, date);
+    var item = Item.createWithUriDate(uri, date);
 
     // Set basic properties
     item.title = entry.title;
@@ -145,19 +129,18 @@ function handleError(error) {
 function verify() {
     console.log("Verifying Miniflux connection...");
     console.log("Site: " + (site || "(empty)"));
-    console.log("Username: " + (username || "(empty)"));
-    console.log("Password: " + (password ? "(provided)" : "(empty)"));
+    console.log("API Token: " + (apiToken ? "(provided)" : "(empty)"));
 
     // Skip verification if critical fields are missing
     // On iOS, verify() may be called as user types, so we return early without signaling
-    if (!site || !username || !password) {
+    if (!site || !apiToken) {
         console.log("Skipping verification - fields not yet complete");
         return Promise.resolve();
     }
 
     // Build the URL to test authentication (using /v1/me endpoint)
-    const baseUrl = site.replace(/\/$/, "");
-    const verifyUrl = baseUrl + "/v1/me";
+    var baseUrl = site.replace(/\/$/, "");
+    var verifyUrl = baseUrl + "/v1/me";
 
     // Make a request to verify credentials
     return sendRequest(verifyUrl, {
@@ -168,8 +151,8 @@ function verify() {
         console.log("Authentication successful!");
 
         // Parse response to get user info
-        const userData = JSON.parse(response.body);
-        const displayName = userData.username ? "Miniflux (" + userData.username + ")" : "Miniflux Feed";
+        var userData = JSON.parse(response.body);
+        var displayName = userData.username ? "Miniflux (" + userData.username + ")" : "Miniflux Feed";
 
         // Signal successful verification to Tapestry
         processVerification({
@@ -182,10 +165,10 @@ function verify() {
         console.log("Verification failed: " + error.message);
 
         // Provide user-friendly error messages
-        let errorMessage = "Failed to connect to Miniflux";
+        var errorMessage = "Failed to connect to Miniflux";
 
         if (error.message.includes("401")) {
-            errorMessage = "Authentication failed. Please check your username and password.";
+            errorMessage = "Authentication failed. Please check your API token.";
         } else if (error.message.includes("404")) {
             errorMessage = "Miniflux instance not found. Please check your instance URL.";
         } else if (error.message.includes("timeout")) {
@@ -211,9 +194,22 @@ function verify() {
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
+    console.log("Site: " + (site || "(empty)"));
+    console.log("API Token: " + (apiToken ? "(provided)" : "(empty)"));
+
+    // Check if required fields are present
+    if (!site || !apiToken) {
+        var missingFields = [];
+        if (!site) missingFields.push("Site");
+        if (!apiToken) missingFields.push("API Token");
+
+        var errorMsg = "Missing required configuration: " + missingFields.join(", ");
+        console.log(errorMsg);
+        throw new Error(errorMsg);
+    }
 
     // Build the API URL
-    const url = buildEntriesUrl();
+    var url = buildEntriesUrl();
     console.log("Fetching from: " + url);
 
     // Make the request
@@ -223,16 +219,16 @@ function load() {
     })
     .then(function(response) {
         // Parse the JSON response
-        const data = JSON.parse(response.body);
+        var data = JSON.parse(response.body);
 
         console.log("Received " + data.total + " unread articles");
 
         // Convert each entry to a Tapestry Item
-        const items = [];
+        var items = [];
         if (data.entries && data.entries.length > 0) {
-            for (let i = 0; i < data.entries.length; i++) {
-                const entry = data.entries[i];
-                const item = convertEntryToItem(entry);
+            for (var i = 0; i < data.entries.length; i++) {
+                var entry = data.entries[i];
+                var item = convertEntryToItem(entry);
                 items.push(item);
             }
         }
@@ -254,7 +250,7 @@ function load() {
  * @param {string} actionId - The action identifier ("mark_as_read")
  * @param {string} actionValue - The entry ID to mark as read
  * @param {Item} item - The Tapestry Item object
- * @returns {Promise} Resolves when the action is completed
+ * @returns {Promise} Resolves when the action is compvared
  */
 function performAction(actionId, actionValue, item) {
     console.log("Performing action: " + actionId + " on entry: " + actionValue);
@@ -266,11 +262,11 @@ function performAction(actionId, actionValue, item) {
     }
 
     // Build the API URL for updating entries
-    const baseUrl = site.replace(/\/$/, "");
-    const updateUrl = baseUrl + "/v1/entries";
+    var baseUrl = site.replace(/\/$/, "");
+    var updateUrl = baseUrl + "/v1/entries";
 
     // Prepare the request body
-    const requestBody = JSON.stringify({
+    var requestBody = JSON.stringify({
         entry_ids: [parseInt(actionValue)],
         status: "read"
     });

@@ -10,7 +10,6 @@ Read your unread articles from Miniflux directly in your Tapestry timeline.
 
 - ✅ Connect to any Miniflux instance (self-hosted or cloud)
 - ✅ Display unread articles in chronological order
-- ✅ Filter by specific categories (optional)
 - ✅ Customize the number of articles to fetch
 - ✅ Mark articles as read directly from Tapestry
 - ✅ View article metadata (author, feed, category)
@@ -46,18 +45,11 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
   - Example: `https://splendid-ladybug.pikapod.net`
   - Make sure to include `https://` and remove any trailing slash
 
-- **Username**: Your Miniflux username
-
-- **Password or API Token**: Your Miniflux password or API token
-  - You can use either your regular password or generate an API token in Miniflux settings
-  - API tokens are more secure and recommended for production use
+- **API Token**: Your Miniflux API token
+  - Generate an API token in Miniflux settings (Settings → API Keys)
+  - API tokens provide secure authentication without exposing your password
 
 ### Optional Settings
-
-- **Category IDs**: Comma-separated list of category IDs to display
-  - Example: `1,5,8`
-  - Leave empty to show articles from all categories
-  - To find category IDs, visit: `https://your-instance/v1/categories` (while logged in)
 
 - **Number of articles to fetch**: Maximum number of unread articles to retrieve
   - Default: 50
@@ -67,7 +59,7 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
 
 ### Authentication
 
-The connector uses HTTP Basic Authentication to connect to your Miniflux instance. Your credentials are encoded in Base64 and sent with each API request. Tapestry securely stores your credentials.
+The connector uses the X-Auth-Token header with your API token to connect to your Miniflux instance. Your API token is securely stored by Tapestry and sent with each API request.
 
 ### Loading Articles
 
@@ -98,41 +90,13 @@ You can mark articles as read directly from Tapestry:
 3. The article will be marked as read in your Miniflux instance
 4. On next refresh, the article will no longer appear in your timeline
 
-## Finding Your Category IDs
-
-To find the category IDs you want to filter:
-
-1. Open your Miniflux instance in a browser
-2. Log in with your credentials
-3. Navigate to: `https://your-instance/v1/categories`
-4. You'll see a JSON response with all your categories
-5. Note the `id` field for each category you want to include
-
-Example response:
-```json
-[
-  {
-    "id": 1,
-    "title": "Tech",
-    "user_id": 1
-  },
-  {
-    "id": 5,
-    "title": "News",
-    "user_id": 1
-  }
-]
-```
-
-In this example, to show only Tech and News articles, enter: `1,5`
-
 ## Troubleshooting
 
 ### "Authentication failed" error
 
-- Double-check your username and password
+- Double-check your API token is correct
 - Ensure your Miniflux account is active
-- Try generating an API token in Miniflux settings and use that instead of your password
+- Generate a new API token in Miniflux settings (Settings → API Keys) if needed
 
 ### "Miniflux instance not found" error
 
@@ -144,7 +108,6 @@ In this example, to show only Tech and News articles, enter: `1,5`
 ### No articles appearing
 
 - Make sure you have unread articles in Miniflux
-- Check if you're filtering by categories that have no unread articles
 - Try increasing the article limit
 - Check the Tapestry console for error messages
 
@@ -210,7 +173,7 @@ For issues or questions:
 ### 1.0.0 (2026-01-14)
 
 - Initial release
-- Support for authentication
+- X-Auth-Token authentication with API token
 - Fetch unread articles
-- Category filtering
 - Mark as read action
+- Full HTML content support
