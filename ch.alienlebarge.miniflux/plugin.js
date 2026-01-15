@@ -234,10 +234,21 @@ function load() {
         }
 
         console.log("Converted " + items.length + " items");
-        return items;
+
+        // Debug: log first item to see its structure
+        if (items.length > 0) {
+            console.log("First item sample:");
+            console.log("  title: " + items[0].title);
+            console.log("  uri: " + items[0].uri);
+            console.log("  date: " + items[0].date);
+        }
+
+        // Signal to Tapestry that results are ready
+        processResults(items, true);
     })
     .catch(function(error) {
-        handleError(error);
+        console.log("Error in load(): " + error.message);
+        processError(error.message);
     });
 }
 
