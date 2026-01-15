@@ -67,7 +67,8 @@ function convertEntryToItem(entry) {
 
     // Set basic properties
     item.title = entry.title;
-    item.body = entry.content; // HTML content from Miniflux
+    // Temporarily disable body content to test performance
+    // item.body = entry.content; // HTML content from Miniflux
 
     // Set author if available
     if (entry.author && entry.author.trim() !== "") {
