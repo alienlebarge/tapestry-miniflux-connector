@@ -1,20 +1,11 @@
 {
   "inputs": [
     {
-      "name": "site",
-      "type": "url",
-      "prompt": "Miniflux Instance URL",
-      "placeholder": "https://your-instance.miniflux.app"
-    },
-    {
-      "name": "username",
+      "name": "apiToken",
       "type": "text",
-      "prompt": "Username"
-    },
-    {
-      "name": "password",
-      "type": "password",
-      "prompt": "Password or API Token"
+      "prompt": "API Token",
+      "placeholder": "Your Miniflux API token",
+      "required": true
     },
     {
       "name": "category_filter",
