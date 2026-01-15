@@ -216,7 +216,7 @@ function load() {
     console.log("Fetching from: " + url);
 
     // Make the request
-    return sendRequest(url, "GET", null, getAuthHeaders())
+    sendRequest(url, "GET", null, getAuthHeaders())
     .then(function(response) {
         // Parse the JSON response (response is the body string directly)
         var data = JSON.parse(response);
