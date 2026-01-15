@@ -73,10 +73,10 @@ function convertEntryToItem(entry) {
     if (entry.feed && entry.feed.title) {
         var author = Identity.createWithName(entry.feed.title);
 
-        // Add feed favicon as avatar using DuckDuckGo service
+        // Add feed favicon as avatar using Google Favicons service (returns PNG)
         if (entry.feed.site_url) {
             var domain = entry.feed.site_url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-            author.avatar = "https://icons.duckduckgo.com/ip3/" + domain + ".ico";
+            author.avatar = "https://www.google.com/s2/favicons?domain=" + domain + "&sz=128";
         }
 
         item.author = author;
