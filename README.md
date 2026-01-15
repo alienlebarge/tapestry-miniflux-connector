@@ -112,3 +112,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues or questions, please open an issue on GitHub.
+
+## 🤖 Development Note
+
+This project was created as an experiment: **writing minimal code using AI as the primary assistant**. The goal was to explore the possibilities offered by artificial intelligence in software development and test how far we can go by delegating most of the coding work to AI.
