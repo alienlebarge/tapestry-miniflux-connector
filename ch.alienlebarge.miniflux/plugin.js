@@ -118,11 +118,16 @@ function convertEntryToItem(entry) {
     }
 
     // Star/Unstar action based on current starred status
+    // Note: Miniflux entry has "starred" boolean field
     if (entry.starred) {
         actions["unstar"] = entryId;
     } else {
         actions["star"] = entryId;
     }
+
+    // Debug: log actions being set
+    console.log("Entry " + entryId + " - status: " + entry.status + ", starred: " + entry.starred);
+    console.log("Actions set: " + JSON.stringify(actions));
 
     item.actions = actions;
 
