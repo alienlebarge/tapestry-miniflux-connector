@@ -28,9 +28,10 @@ function getAuthHeaders() {
 /**
  * Builds the Miniflux API URL for fetching entries
  *
- * @returns {string} Compvare API URL with query parameters
+ * @param {number} categoryId - Optional category ID to filter by
+ * @returns {string} Complete API URL with query parameters
  */
-function buildEntriesUrl() {
+function buildEntriesUrl(categoryId) {
     // Remove trailing slash from site URL if present
     var baseUrl = site.replace(/\/$/, "");
 
@@ -45,6 +46,11 @@ function buildEntriesUrl() {
     // Add limit parameter (default to 500 if not specified)
     var articleLimit = limit || 500;
     url += "&limit=" + articleLimit;
+
+    // Add category filter if specified (0 means all categories)
+    if (categoryId && categoryId.toString().trim() !== "" && categoryId.toString().trim() !== "0") {
+        url += "&category_id=" + categoryId;
+    }
 
     return url;
 }
@@ -201,37 +207,39 @@ function verify() {
  *
  * This function is called by Tapestry to load new content.
  * It retrieves unread articles and converts them to Tapestry Items.
+ * If a category ID is specified in the configuration, only articles
+ * from that category are fetched.
  *
  * @returns {Promise<Array<Item>>} Array of Tapestry Items
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
 
-    var url = buildEntriesUrl();
+    var url = buildEntriesUrl(categoryId);
     console.log("Fetching from: " + url);
 
     sendRequest(url, "GET", null, getAuthHeaders())
-    .then(function(response) {
-        var data = JSON.parse(response);
-        console.log("Received " + data.total + " unread articles");
+        .then(function(response) {
+            var data = JSON.parse(response);
+            console.log("Received " + data.total + " unread articles");
 
-        var items = [];
-        if (data.entries && data.entries.length > 0) {
-            for (var i = 0; i < data.entries.length; i++) {
-                var entry = data.entries[i];
-                var item = convertEntryToItem(entry);
-                items.push(item);
+            var items = [];
+            if (data.entries && data.entries.length > 0) {
+                for (var i = 0; i < data.entries.length; i++) {
+                    var entry = data.entries[i];
+                    var item = convertEntryToItem(entry);
+                    items.push(item);
+                }
             }
-        }
 
-        console.log("Converted " + items.length + " items");
-        console.log("Calling processResults with " + items.length + " items");
-        processResults(items);
-    })
-    .catch(function(error) {
-        console.log("Error in load(): " + error);
-        processError("Failed to load articles: " + error);
-    });
+            console.log("Converted " + items.length + " items");
+            console.log("Calling processResults with " + items.length + " items");
+            processResults(items);
+        })
+        .catch(function(error) {
+            console.log("Error in load(): " + error);
+            processError("Failed to load articles: " + error);
+        });
 }
 
 /**

@@ -8,6 +8,13 @@
       "required": true
     },
     {
+      "name": "categoryId",
+      "type": "text",
+      "prompt": "Category ID",
+      "placeholder": "0 for all categories",
+      "value": "0"
+    },
+    {
       "name": "limit",
       "type": "number",
       "prompt": "Number of articles to fetch",
