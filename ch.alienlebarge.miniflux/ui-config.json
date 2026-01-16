@@ -11,7 +11,9 @@
       "name": "categoryId",
       "type": "text",
       "prompt": "Category ID (optional)",
-      "placeholder": "e.g. 5 (leave empty for all)"
+      "placeholder": "e.g. 5 (leave empty for all)",
+      "required": false,
+      "value": ""
     },
     {
       "name": "limit",
