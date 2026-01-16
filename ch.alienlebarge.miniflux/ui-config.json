@@ -8,6 +8,12 @@
       "required": true
     },
     {
+      "name": "category",
+      "type": "text",
+      "prompt": "Category (optional)",
+      "placeholder": "e.g. Tech, News (leave empty for all)"
+    },
+    {
       "name": "limit",
       "type": "number",
       "prompt": "Number of articles to fetch",

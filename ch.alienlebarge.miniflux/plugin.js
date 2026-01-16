@@ -28,9 +28,10 @@ function getAuthHeaders() {
 /**
  * Builds the Miniflux API URL for fetching entries
  *
- * @returns {string} Compvare API URL with query parameters
+ * @param {number} categoryId - Optional category ID to filter by
+ * @returns {string} Complete API URL with query parameters
  */
-function buildEntriesUrl() {
+function buildEntriesUrl(categoryId) {
     // Remove trailing slash from site URL if present
     var baseUrl = site.replace(/\/$/, "");
 
@@ -46,7 +47,47 @@ function buildEntriesUrl() {
     var articleLimit = limit || 500;
     url += "&limit=" + articleLimit;
 
+    // Add category filter if specified
+    if (categoryId) {
+        url += "&category_id=" + categoryId;
+    }
+
     return url;
+}
+
+/**
+ * Fetches categories from Miniflux and finds the ID for a given category name
+ *
+ * @param {string} categoryName - The name of the category to find
+ * @returns {Promise<number|null>} The category ID or null if not found
+ */
+function getCategoryIdByName(categoryName) {
+    if (!categoryName || categoryName.trim() === "") {
+        return Promise.resolve(null);
+    }
+
+    var baseUrl = site.replace(/\/$/, "");
+    var url = baseUrl + "/v1/categories";
+
+    return sendRequest(url, "GET", null, getAuthHeaders())
+        .then(function(response) {
+            var categories = JSON.parse(response);
+            var searchName = categoryName.trim().toLowerCase();
+
+            for (var i = 0; i < categories.length; i++) {
+                if (categories[i].title.toLowerCase() === searchName) {
+                    console.log("Found category '" + categoryName + "' with ID: " + categories[i].id);
+                    return categories[i].id;
+                }
+            }
+
+            console.log("Category '" + categoryName + "' not found");
+            return null;
+        })
+        .catch(function(error) {
+            console.log("Error fetching categories: " + error.message);
+            return null;
+        });
 }
 
 /**
@@ -201,37 +242,47 @@ function verify() {
  *
  * This function is called by Tapestry to load new content.
  * It retrieves unread articles and converts them to Tapestry Items.
+ * If a category is specified in the configuration, only articles from
+ * that category are fetched.
  *
  * @returns {Promise<Array<Item>>} Array of Tapestry Items
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
 
-    var url = buildEntriesUrl();
-    console.log("Fetching from: " + url);
-
-    sendRequest(url, "GET", null, getAuthHeaders())
-    .then(function(response) {
-        var data = JSON.parse(response);
-        console.log("Received " + data.total + " unread articles");
-
-        var items = [];
-        if (data.entries && data.entries.length > 0) {
-            for (var i = 0; i < data.entries.length; i++) {
-                var entry = data.entries[i];
-                var item = convertEntryToItem(entry);
-                items.push(item);
+    // First, resolve category name to ID if specified
+    getCategoryIdByName(category)
+        .then(function(categoryId) {
+            if (category && !categoryId) {
+                console.log("Warning: Category '" + category + "' not found, loading all articles");
             }
-        }
 
-        console.log("Converted " + items.length + " items");
-        console.log("Calling processResults with " + items.length + " items");
-        processResults(items);
-    })
-    .catch(function(error) {
-        console.log("Error in load(): " + error);
-        processError("Failed to load articles: " + error);
-    });
+            var url = buildEntriesUrl(categoryId);
+            console.log("Fetching from: " + url);
+
+            return sendRequest(url, "GET", null, getAuthHeaders());
+        })
+        .then(function(response) {
+            var data = JSON.parse(response);
+            console.log("Received " + data.total + " unread articles");
+
+            var items = [];
+            if (data.entries && data.entries.length > 0) {
+                for (var i = 0; i < data.entries.length; i++) {
+                    var entry = data.entries[i];
+                    var item = convertEntryToItem(entry);
+                    items.push(item);
+                }
+            }
+
+            console.log("Converted " + items.length + " items");
+            console.log("Calling processResults with " + items.length + " items");
+            processResults(items);
+        })
+        .catch(function(error) {
+            console.log("Error in load(): " + error);
+            processError("Failed to load articles: " + error);
+        });
 }
 
 /**

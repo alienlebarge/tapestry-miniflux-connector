@@ -10,6 +10,7 @@ Read your unread articles from Miniflux directly in your Tapestry timeline.
 
 - ✅ Connect to any Miniflux instance (self-hosted or cloud)
 - ✅ Display unread articles in chronological order
+- ✅ Filter articles by category
 - ✅ Customize the number of articles to fetch
 - ✅ Mark articles as read directly from Tapestry
 - ✅ View article metadata (author, feed, category)
@@ -51,10 +52,14 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
 
 ### Optional Settings
 
+- **Category**: Filter articles by Miniflux category
+  - Enter the exact name of the category (case-insensitive)
+  - Example: `Tech`, `News`, `Blogs`
+  - Leave empty to fetch articles from all categories
+
 - **Number of articles to fetch**: Maximum number of unread articles to retrieve
-  - Default: 10
-  - Recommended: 10-20 for better performance
-  - Note: Each article includes full HTML content, so lower numbers load faster
+  - Default: 500
+  - Note: Only articles from the last 30 days are fetched for performance
 
 ## How It Works
 
@@ -123,6 +128,7 @@ You can mark articles as read directly from Tapestry:
 This connector uses the following Miniflux API endpoints:
 
 - `GET /v1/me` - Verify authentication
+- `GET /v1/categories` - Fetch categories (for category filtering)
 - `GET /v1/entries` - Fetch unread articles
 - `PUT /v1/entries` - Mark articles as read
 
