@@ -52,9 +52,9 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
 
 ### Optional Settings
 
-- **Category**: Filter articles by Miniflux category
-  - Enter the exact name of the category (case-insensitive)
-  - Example: `Tech`, `News`, `Blogs`
+- **Category ID**: Filter articles by Miniflux category
+  - Enter the numeric ID of the category
+  - Find category IDs in Miniflux: Settings → Categories (the ID is in the URL when editing)
   - Leave empty to fetch articles from all categories
 
 - **Number of articles to fetch**: Maximum number of unread articles to retrieve
@@ -128,8 +128,7 @@ You can mark articles as read directly from Tapestry:
 This connector uses the following Miniflux API endpoints:
 
 - `GET /v1/me` - Verify authentication
-- `GET /v1/categories` - Fetch categories (for category filtering)
-- `GET /v1/entries` - Fetch unread articles
+- `GET /v1/entries` - Fetch unread articles (supports `category_id` filter)
 - `PUT /v1/entries` - Mark articles as read
 
 For more information, see the [Miniflux API Documentation](https://miniflux.app/docs/api.html).

@@ -56,41 +56,6 @@ function buildEntriesUrl(categoryId) {
 }
 
 /**
- * Fetches categories from Miniflux and finds the ID for a given category name
- *
- * @param {string} categoryName - The name of the category to find
- * @returns {Promise<number|null>} The category ID or null if not found
- */
-function getCategoryIdByName(categoryName) {
-    if (!categoryName || categoryName.trim() === "") {
-        return Promise.resolve(null);
-    }
-
-    var baseUrl = site.replace(/\/$/, "");
-    var url = baseUrl + "/v1/categories";
-
-    return sendRequest(url, "GET", null, getAuthHeaders())
-        .then(function(response) {
-            var categories = JSON.parse(response);
-            var searchName = categoryName.trim().toLowerCase();
-
-            for (var i = 0; i < categories.length; i++) {
-                if (categories[i].title.toLowerCase() === searchName) {
-                    console.log("Found category '" + categoryName + "' with ID: " + categories[i].id);
-                    return categories[i].id;
-                }
-            }
-
-            console.log("Category '" + categoryName + "' not found");
-            return null;
-        })
-        .catch(function(error) {
-            console.log("Error fetching categories: " + error.message);
-            return null;
-        });
-}
-
-/**
  * Converts a Miniflux entry to a Tapestry Item
  *
  * @param {Object} entry - A Miniflux entry object
@@ -242,26 +207,18 @@ function verify() {
  *
  * This function is called by Tapestry to load new content.
  * It retrieves unread articles and converts them to Tapestry Items.
- * If a category is specified in the configuration, only articles from
- * that category are fetched.
+ * If a category ID is specified in the configuration, only articles
+ * from that category are fetched.
  *
  * @returns {Promise<Array<Item>>} Array of Tapestry Items
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
 
-    // First, resolve category name to ID if specified
-    getCategoryIdByName(category)
-        .then(function(categoryId) {
-            if (category && !categoryId) {
-                console.log("Warning: Category '" + category + "' not found, loading all articles");
-            }
+    var url = buildEntriesUrl(categoryId);
+    console.log("Fetching from: " + url);
 
-            var url = buildEntriesUrl(categoryId);
-            console.log("Fetching from: " + url);
-
-            return sendRequest(url, "GET", null, getAuthHeaders());
-        })
+    sendRequest(url, "GET", null, getAuthHeaders())
         .then(function(response) {
             var data = JSON.parse(response);
             console.log("Received " + data.total + " unread articles");

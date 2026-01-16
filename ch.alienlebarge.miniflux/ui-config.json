@@ -8,10 +8,10 @@
       "required": true
     },
     {
-      "name": "category",
+      "name": "categoryId",
       "type": "text",
-      "prompt": "Category (optional)",
-      "placeholder": "e.g. Tech, News (leave empty for all)"
+      "prompt": "Category ID (optional)",
+      "placeholder": "e.g. 5 (leave empty for all)"
     },
     {
       "name": "limit",
