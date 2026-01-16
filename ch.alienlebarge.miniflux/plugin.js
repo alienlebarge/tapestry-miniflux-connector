@@ -47,8 +47,8 @@ function buildEntriesUrl(categoryId) {
     var articleLimit = limit || 500;
     url += "&limit=" + articleLimit;
 
-    // Add category filter if specified
-    if (categoryId) {
+    // Add category filter if specified and not empty
+    if (categoryId && categoryId.toString().trim() !== "") {
         url += "&category_id=" + categoryId;
     }
 
