@@ -53,9 +53,9 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
 ### Optional Settings
 
 - **Category ID**: Filter articles by Miniflux category
-  - Enter the numeric ID of the category
+  - Enter `0` to fetch articles from all categories (default)
+  - Enter a specific category ID to filter by that category
   - Find category IDs in Miniflux: Settings → Categories (the ID is in the URL when editing)
-  - Leave empty to fetch articles from all categories
 
 - **Number of articles to fetch**: Maximum number of unread articles to retrieve
   - Default: 500
