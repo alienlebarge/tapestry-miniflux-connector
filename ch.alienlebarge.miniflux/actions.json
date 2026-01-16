@@ -3,7 +3,25 @@
     {
       "id": "mark_as_read",
       "display_name": "Mark as Read",
-      "icon": "checkmark.circle",
+      "icon": "eye",
+      "destructive": false
+    },
+    {
+      "id": "mark_as_unread",
+      "display_name": "Mark as Unread",
+      "icon": "eye.slash",
+      "destructive": false
+    },
+    {
+      "id": "star",
+      "display_name": "Star",
+      "icon": "star",
+      "destructive": false
+    },
+    {
+      "id": "unstar",
+      "display_name": "Unstar",
+      "icon": "star.fill",
       "destructive": false
     }
   ]
