@@ -17,7 +17,7 @@ This connector allows you to read your unread articles from any Miniflux instanc
 - 🏷️ Filter by specific categories
 - ✅ Mark articles as read from Tapestry
 - 🌐 Works with any Miniflux instance (self-hosted or cloud)
-- 🔒 Secure authentication with HTTP Basic Auth
+- 🔒 Secure authentication with API Token
 - ⚙️ Customizable fetch limit
 
 ## Installation
@@ -43,8 +43,7 @@ This connector allows you to read your unread articles from any Miniflux instanc
 
 You'll need:
 - Your Miniflux instance URL (e.g., `https://your-instance.miniflux.app`)
-- Your Miniflux username
-- Your Miniflux password or API token
+- Your Miniflux API token (generate in Miniflux: Settings → API Keys)
 
 See the [full documentation](ch.alienlebarge.miniflux/README.md) in the connector folder for detailed setup instructions.
 
