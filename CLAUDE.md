@@ -37,8 +37,9 @@ The connector implements three mandatory functions:
    - Returns user info and sets `displayName` via `processVerification()`
 
 2. **`load()`** - Fetches unread entries from Miniflux API (`/v1/entries`) and converts them to Tapestry Items
-   - Filters to articles from the last 30 days for performance
+   - Uses adaptive time window: 7 days on first load, 4 hours on subsequent loads
    - Uses the user-configured `limit` (default 500)
+   - Stores fetch timestamp with `setItem()` for multi-device sync
    - Calls `processResults()` with array of items
 
 3. **`performAction(actionId, actionValue, item)`** - Handles "mark_as_read" action via Miniflux API (`PUT /v1/entries`)
@@ -107,7 +108,7 @@ if (entry.status === "unread") {
 - **Key Endpoints**:
   - `GET /v1/me` - Verify authentication and get user info
   - `GET /v1/entries?status=unread&order=published_at&direction=desc&published_after={timestamp}&limit={limit}` - Fetch entries
-    - `published_after`: Unix timestamp for time filtering (30 days ago by default)
+    - `published_after`: Unix timestamp for time filtering (7 days on first load, 4 hours on subsequent loads)
     - `limit`: Maximum number of entries to fetch (default: 500)
   - `PUT /v1/entries` - Update entry status
     - Body: `{ "entry_ids": [id], "status": "read" }`
@@ -191,7 +192,8 @@ Check your current branch with `git branch --show-current` before making changes
 - **Category Support**: Displays Miniflux categories when available
 
 ### Performance Optimizations
-- **Time Filtering**: Only fetches articles from the last 30 days (reduces API load)
+- **Adaptive Time Window**: Uses smart time filtering (7 days on first load, 4 hours on subsequent loads)
+- **Multi-Device Sync**: 4-hour window on subsequent loads captures changes made on other devices
 - **Default Limit**: 500 articles (configurable by user)
 - **Efficient Loading**: Full HTML content with optimized fetching
 
@@ -217,9 +219,20 @@ var baseUrl = site.replace(/\/$/, "");
 // Build entry URL with parameters
 var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
-// Add time filter (30 days)
-var oneMonthAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
-url += "&published_after=" + oneMonthAgo;
+// Adaptive time window using getItem/setItem for persistence
+var lastFetchTime = getItem("lastFetchTime");
+var publishedAfter;
+if (!lastFetchTime) {
+    // First load: 7 days back
+    publishedAfter = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+} else {
+    // Subsequent loads: 4 hours back (for multi-device sync)
+    publishedAfter = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
+}
+url += "&published_after=" + publishedAfter;
+
+// After successful fetch, save timestamp
+setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
 
 // Add limit
 var articleLimit = limit || 500;
@@ -374,7 +387,7 @@ Based on git history, key milestones include:
 - Addition of Identity API for author/source
 - Feed name as author display
 - Miniflux icon integration
-- Time filtering (30 days) and increased limits (50 → 500)
+- Adaptive time window (7 days first load, 4 hours subsequent) and increased limits (50 → 500)
 - Post-style display with feed favicons
 
 ## Working with this Codebase

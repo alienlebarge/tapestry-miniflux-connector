@@ -29,19 +29,18 @@ function getAuthHeaders() {
  * Builds the Miniflux API URL for fetching entries
  *
  * @param {number} categoryId - Optional category ID to filter by
+ * @param {number} publishedAfter - Unix timestamp to filter entries published after this time
  * @returns {string} Complete API URL with query parameters
  */
-function buildEntriesUrl(categoryId) {
+function buildEntriesUrl(categoryId, publishedAfter) {
     // Remove trailing slash from site URL if present
     var baseUrl = site.replace(/\/$/, "");
 
     // Start with base endpoint
     var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
-    // Add time filter to improve performance with large unread counts
-    // Only fetch articles from the last 1 month
-    var oneMonthAgo = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
-    url += "&published_after=" + oneMonthAgo;
+    // Add time filter using provided timestamp
+    url += "&published_after=" + publishedAfter;
 
     // Add limit parameter (default to 500 if not specified)
     var articleLimit = limit || 500;
@@ -230,12 +229,30 @@ function verify() {
  * If a category ID is specified in the configuration, only articles
  * from that category are fetched.
  *
+ * Uses adaptive time window:
+ * - First load: 7 days back (to get recent articles on initial setup)
+ * - Subsequent loads: 4 hours back (for multi-device sync)
+ *
  * @returns {Promise<Array<Item>>} Array of Tapestry Items
  */
 function load() {
     console.log("Loading unread articles from Miniflux...");
 
-    var url = buildEntriesUrl(categoryId);
+    // Get last fetch timestamp to determine time window
+    var lastFetchTime = getItem("lastFetchTime");
+    var publishedAfter;
+
+    if (!lastFetchTime) {
+        // First load: 7 days back
+        publishedAfter = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+        console.log("Initial fetch: looking back 7 days");
+    } else {
+        // Subsequent loads: 4 hours back
+        publishedAfter = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
+        console.log("Subsequent fetch: looking back 4 hours");
+    }
+
+    var url = buildEntriesUrl(categoryId, publishedAfter);
     console.log("Fetching from: " + url);
 
     sendRequest(url, "GET", null, getAuthHeaders())
@@ -251,6 +268,9 @@ function load() {
                     items.push(item);
                 }
             }
+
+            // Save fetch timestamp for next load
+            setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
 
             console.log("Converted " + items.length + " items");
             console.log("Calling processResults with " + items.length + " items");
