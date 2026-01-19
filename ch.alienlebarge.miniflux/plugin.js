@@ -292,6 +292,23 @@ function performAction(actionId, actionValue, item) {
         return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
         .then(function(response) {
             console.log("Article marked as " + newStatus + " successfully");
+
+            // Update item actions to reflect new state
+            var newActions = {};
+            if (newStatus === "read") {
+                newActions["mark_as_unread"] = actionValue;
+            } else {
+                newActions["mark_as_read"] = actionValue;
+            }
+            // Preserve star/unstar action
+            if (item.actions && item.actions["star"]) {
+                newActions["star"] = actionValue;
+            } else if (item.actions && item.actions["unstar"]) {
+                newActions["unstar"] = actionValue;
+            }
+            item.actions = newActions;
+            actionComplete(item);
+
             return response;
         })
         .catch(function(error) {
@@ -307,6 +324,24 @@ function performAction(actionId, actionValue, item) {
         return sendRequest(bookmarkUrl, "PUT", null, getAuthHeaders())
         .then(function(response) {
             console.log("Bookmark toggled successfully");
+
+            // Update item actions to reflect new state
+            var newActions = {};
+            // Toggle star/unstar
+            if (actionId === "star") {
+                newActions["unstar"] = actionValue;
+            } else {
+                newActions["star"] = actionValue;
+            }
+            // Preserve mark_as_read/mark_as_unread action
+            if (item.actions && item.actions["mark_as_read"]) {
+                newActions["mark_as_read"] = actionValue;
+            } else if (item.actions && item.actions["mark_as_unread"]) {
+                newActions["mark_as_unread"] = actionValue;
+            }
+            item.actions = newActions;
+            actionComplete(item);
+
             return response;
         })
         .catch(function(error) {
