@@ -105,11 +105,31 @@ function convertEntryToItem(entry) {
         }
     }
 
-    // Add action for marking as read (if entry is unread)
+    // Add actions based on entry state
+    // Using actions dictionary for multiple actions
+    var actions = {};
+    var entryId = entry.id.toString();
+
+    // Read/Unread action based on current status
     if (entry.status === "unread") {
-        item.action = "mark_as_read";
-        item.actionValue = entry.id.toString();
+        actions["mark_as_read"] = entryId;
+    } else {
+        actions["mark_as_unread"] = entryId;
     }
+
+    // Star/Unstar action based on current starred status
+    // Note: Miniflux entry has "starred" boolean field
+    if (entry.starred) {
+        actions["unstar"] = entryId;
+    } else {
+        actions["star"] = entryId;
+    }
+
+    // Debug: log actions being set
+    console.log("Entry " + entryId + " - status: " + entry.status + ", starred: " + entry.starred);
+    console.log("Actions set: " + JSON.stringify(actions));
+
+    item.actions = actions;
 
     return item;
 }
@@ -246,41 +266,91 @@ function load() {
  * performAction() - Handles user actions on items
  *
  * This function is called when the user performs an action on an item,
- * such as marking an article as read.
+ * such as marking an article as read, unread, starred, or unstarred.
  *
- * @param {string} actionId - The action identifier ("mark_as_read")
- * @param {string} actionValue - The entry ID to mark as read
+ * @param {string} actionId - The action identifier
+ * @param {string} actionValue - The entry ID
  * @param {Item} item - The Tapestry Item object
- * @returns {Promise} Resolves when the action is compvared
+ * @returns {Promise} Resolves when the action is completed
  */
 function performAction(actionId, actionValue, item) {
     console.log("Performing action: " + actionId + " on entry: " + actionValue);
 
-    // Only handle "mark as read" action
-    if (actionId !== "mark_as_read") {
-        console.log("Unknown action: " + actionId);
-        return Promise.resolve();
+    var baseUrl = site.replace(/\/$/, "");
+    var entryId = parseInt(actionValue);
+
+    // Handle read/unread status changes
+    if (actionId === "mark_as_read" || actionId === "mark_as_unread") {
+        var updateUrl = baseUrl + "/v1/entries";
+        var newStatus = (actionId === "mark_as_read") ? "read" : "unread";
+
+        var requestBody = {
+            entry_ids: [entryId],
+            status: newStatus
+        };
+
+        return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
+        .then(function(response) {
+            console.log("Article marked as " + newStatus + " successfully");
+
+            // Update item actions to reflect new state
+            var newActions = {};
+            if (newStatus === "read") {
+                newActions["mark_as_unread"] = actionValue;
+            } else {
+                newActions["mark_as_read"] = actionValue;
+            }
+            // Preserve star/unstar action
+            if (item.actions && item.actions["star"]) {
+                newActions["star"] = actionValue;
+            } else if (item.actions && item.actions["unstar"]) {
+                newActions["unstar"] = actionValue;
+            }
+            item.actions = newActions;
+            actionComplete(item);
+
+            return response;
+        })
+        .catch(function(error) {
+            console.log("Failed to mark article as " + newStatus + ": " + error.message);
+            return Promise.resolve();
+        });
     }
 
-    // Build the API URL for updating entries
-    var baseUrl = site.replace(/\/$/, "");
-    var updateUrl = baseUrl + "/v1/entries";
+    // Handle star/unstar (bookmark toggle)
+    if (actionId === "star" || actionId === "unstar") {
+        var bookmarkUrl = baseUrl + "/v1/entries/" + entryId + "/bookmark";
 
-    // Prepare the request body
-    var requestBody = {
-        entry_ids: [parseInt(actionValue)],
-        status: "read"
-    };
+        return sendRequest(bookmarkUrl, "PUT", null, getAuthHeaders())
+        .then(function(response) {
+            console.log("Bookmark toggled successfully");
 
-    // Make the request to mark the entry as read
-    return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
-    .then(function(response) {
-        console.log("Article marked as read successfully");
-        return response;
-    })
-    .catch(function(error) {
-        console.log("Failed to mark article as read: " + error.message);
-        // Don't throw error here to avoid disrupting the user experience
-        return Promise.resolve();
-    });
+            // Update item actions to reflect new state
+            var newActions = {};
+            // Toggle star/unstar
+            if (actionId === "star") {
+                newActions["unstar"] = actionValue;
+            } else {
+                newActions["star"] = actionValue;
+            }
+            // Preserve mark_as_read/mark_as_unread action
+            if (item.actions && item.actions["mark_as_read"]) {
+                newActions["mark_as_read"] = actionValue;
+            } else if (item.actions && item.actions["mark_as_unread"]) {
+                newActions["mark_as_unread"] = actionValue;
+            }
+            item.actions = newActions;
+            actionComplete(item);
+
+            return response;
+        })
+        .catch(function(error) {
+            console.log("Failed to toggle bookmark: " + error.message);
+            return Promise.resolve();
+        });
+    }
+
+    // Unknown action
+    console.log("Unknown action: " + actionId);
+    return Promise.resolve();
 }
