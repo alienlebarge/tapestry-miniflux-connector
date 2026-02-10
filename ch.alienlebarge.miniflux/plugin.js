@@ -161,6 +161,22 @@ function convertEntryToItem(entry, iconMap) {
 
     item.actions = actions;
 
+    // Add media attachments from enclosures (images, audio, video)
+    if (entry.enclosures && entry.enclosures.length > 0) {
+        var attachments = [];
+        for (var j = 0; j < entry.enclosures.length; j++) {
+            var enclosure = entry.enclosures[j];
+            if (enclosure.url && enclosure.mime_type) {
+                var attachment = MediaAttachment.createWithUrl(enclosure.url);
+                attachment.mimeType = enclosure.mime_type;
+                attachments.push(attachment);
+            }
+        }
+        if (attachments.length > 0) {
+            item.attachments = attachments;
+        }
+    }
+
     return item;
 }
 
