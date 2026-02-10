@@ -42,8 +42,10 @@ The connector implements three mandatory functions:
    - Stores fetch timestamp with `setItem()` for multi-device sync
    - Calls `processResults()` with array of items
 
-3. **`performAction(actionId, actionValue, item)`** - Handles "mark_as_read" action via Miniflux API (`PUT /v1/entries`)
-   - Updates entry status to "read" in Miniflux
+3. **`performAction(actionId, actionValue, item)`** - Handles user actions via Miniflux API
+   - `mark_as_read` / `mark_as_unread`: Updates entry status via `PUT /v1/entries`
+   - `star` / `unstar`: Toggles bookmark via `PUT /v1/entries/{id}/bookmark`
+   - Uses `raiseCondition("authorize")` on 401 errors to trigger re-authentication
 
 ### Item Creation Pattern
 
@@ -81,10 +83,38 @@ if (entry.feed && entry.feed.title) {
     item.source = source;
 }
 
-// Add action for unread items
+// Add actions using actions dictionary
+var actions = {};
+var entryId = entry.id.toString();
+
 if (entry.status === "unread") {
-    item.action = "mark_as_read";
-    item.actionValue = entry.id.toString();
+    actions["mark_as_read"] = entryId;
+} else {
+    actions["mark_as_unread"] = entryId;
+}
+
+if (entry.starred) {
+    actions["unstar"] = entryId;
+} else {
+    actions["star"] = entryId;
+}
+
+item.actions = actions;
+
+// Add media attachments from enclosures
+if (entry.enclosures && entry.enclosures.length > 0) {
+    var attachments = [];
+    for (var j = 0; j < entry.enclosures.length; j++) {
+        var enclosure = entry.enclosures[j];
+        if (enclosure.url && enclosure.mime_type) {
+            var attachment = MediaAttachment.createWithUrl(enclosure.url);
+            attachment.mimeType = enclosure.mime_type;
+            attachments.push(attachment);
+        }
+    }
+    if (attachments.length > 0) {
+        item.attachments = attachments;
+    }
 }
 ```
 
@@ -107,11 +137,12 @@ if (entry.status === "unread") {
   ```
 - **Key Endpoints**:
   - `GET /v1/me` - Verify authentication and get user info
-  - `GET /v1/entries?status=unread&order=published_at&direction=desc&published_after={timestamp}&limit={limit}` - Fetch entries
-    - `published_after`: Unix timestamp for time filtering (7 days on first load, 4 hours on subsequent loads)
+  - `GET /v1/entries?status=unread&order=published_at&direction=desc&{timeParam}={timestamp}&limit={limit}` - Fetch entries
+    - First load uses `published_after` (7 days back), subsequent loads use `changed_after` (4 hours back) for better multi-device sync
     - `limit`: Maximum number of entries to fetch (default: 500)
   - `PUT /v1/entries` - Update entry status
-    - Body: `{ "entry_ids": [id], "status": "read" }`
+    - Body: `{ "entry_ids": [id], "status": "read" }` or `{ "entry_ids": [id], "status": "unread" }`
+  - `PUT /v1/entries/{id}/bookmark` - Toggle star/bookmark status
 
 ### Tapestry API
 - Follow ECMA-262 specification (standard JavaScript only)
@@ -198,7 +229,17 @@ Check your current branch with `git branch --show-current` before making changes
 - **Efficient Loading**: Full HTML content with optimized fetching
 
 ### User Actions
-- **Mark as Read**: Single action that updates Miniflux entry status via API
+- **Mark as Read / Mark as Unread**: Toggle read status via Miniflux API
+- **Star / Unstar**: Toggle bookmark status via Miniflux API
+
+### Media Attachments
+- **Enclosures**: Converts Miniflux enclosures (images, audio, video) to `MediaAttachment` objects
+- **`provides_attachments: false`**: Tapestry continues to auto-generate image previews from body HTML
+
+### Error Handling
+- **401 errors**: Uses `raiseCondition("authorize")` to trigger Tapestry's re-authentication flow
+- **404 errors in `load()`**: Uses `raiseCondition("disable")` to signal an unreachable instance
+- **Other errors**: Falls back to `processError()` with descriptive messages
 
 ## Documentation Maintenance
 
@@ -221,15 +262,18 @@ var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc
 
 // Adaptive time window using getItem/setItem for persistence
 var lastFetchTime = getItem("lastFetchTime");
-var publishedAfter;
+var timestamp;
+var timeParam;
 if (!lastFetchTime) {
-    // First load: 7 days back
-    publishedAfter = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+    // First load: 7 days back, use published_after
+    timestamp = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+    timeParam = "published_after";
 } else {
-    // Subsequent loads: 4 hours back (for multi-device sync)
-    publishedAfter = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
+    // Subsequent loads: 4 hours back, use changed_after for multi-device sync
+    timestamp = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
+    timeParam = "changed_after";
 }
-url += "&published_after=" + publishedAfter;
+url += "&" + timeParam + "=" + timestamp;
 
 // After successful fetch, save timestamp
 setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
@@ -241,16 +285,22 @@ url += "&limit=" + articleLimit;
 
 ### Error Handling
 ```javascript
-function handleError(error) {
-    console.log("Error occurred: " + error.message);
-
-    if (error.message.includes("401")) {
-        throw new Error("Authentication failed. Please check your API token.");
-    } else if (error.message.includes("404")) {
-        throw new Error("Miniflux instance not found. Please check your instance URL.");
+// In load() catch handler — use raiseCondition for persistent errors
+.catch(function(error) {
+    if (error.message && error.message.includes("401")) {
+        raiseCondition("authorize",
+            "Authentication Failed",
+            "Your API token is invalid or expired. Please re-enter your credentials."
+        );
+    } else if (error.message && error.message.includes("404")) {
+        raiseCondition("disable",
+            "Instance Not Found",
+            "The Miniflux instance URL appears to be incorrect or the server is no longer available."
+        );
+    } else {
+        processError("Failed to load articles: " + error);
     }
-    // ... more error cases
-}
+});
 ```
 
 ### Processing Responses
@@ -372,8 +422,8 @@ tapestry-miniflux-connector/
 - Helper functions for API communication and data conversion
 
 **`actions.json`**
-- Defines available user actions (currently only `mark_as_read`)
-- Includes display name and icon
+- Defines available user actions: `mark_as_read`, `mark_as_unread`, `star`, `unstar`
+- Includes display name and icon for each action
 
 **`.github/workflows/release.yml`**
 - Automatically builds `.tapestry` package on release creation

@@ -15,7 +15,9 @@ This connector allows you to read your unread articles from any Miniflux instanc
 
 - 📰 Display unread articles from Miniflux in Tapestry
 - 🏷️ Filter by specific categories
-- ✅ Mark articles as read from Tapestry
+- ✅ Mark articles as read/unread from Tapestry
+- ⭐ Star/unstar articles
+- 🖼️ Media attachments support (images, audio, video from enclosures)
 - 🌐 Works with any Miniflux instance (self-hosted or cloud)
 - 🔒 Secure authentication with API Token
 - ⚙️ Customizable fetch limit
