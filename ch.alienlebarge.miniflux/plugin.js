@@ -55,12 +55,41 @@ function buildEntriesUrl(categoryId, publishedAfter) {
 }
 
 /**
+ * Fetches a feed icon from the Miniflux API
+ *
+ * @param {string} baseUrl - The Miniflux instance base URL
+ * @param {string} feedId - The feed ID
+ * @param {number} iconId - The icon ID
+ * @returns {Promise<Object|null>} Object with feedId and dataUri, or null on failure
+ */
+function fetchFeedIcon(baseUrl, feedId, iconId) {
+    var iconUrl = baseUrl + "/v1/icons/" + iconId;
+    return sendRequest(iconUrl, "GET", null, getAuthHeaders())
+        .then(function(response) {
+            var iconData = JSON.parse(response);
+            if (iconData && iconData.data) {
+                // iconData.data is in format "image/png;base64,iVBOR..."
+                return {
+                    feedId: feedId,
+                    dataUri: "data:" + iconData.data
+                };
+            }
+            return null;
+        })
+        .catch(function(error) {
+            console.log("Failed to fetch icon for feed " + feedId + ": " + error.message);
+            return null;
+        });
+}
+
+/**
  * Converts a Miniflux entry to a Tapestry Item
  *
  * @param {Object} entry - A Miniflux entry object
+ * @param {Object} iconMap - Map of feed ID to base64 data URI strings
  * @returns {Item} A Tapestry Item object
  */
-function convertEntryToItem(entry) {
+function convertEntryToItem(entry, iconMap) {
     // Create unique URI for this article (using the article URL and ID)
     var uri = entry.url + "#" + entry.id;
 
@@ -78,8 +107,10 @@ function convertEntryToItem(entry) {
     if (entry.feed && entry.feed.title) {
         var author = Identity.createWithName(entry.feed.title);
 
-        // Add feed favicon as avatar using DuckDuckGo service
-        if (entry.feed.site_url) {
+        // Use native Miniflux icon if available, fall back to DuckDuckGo
+        if (iconMap && entry.feed.id && iconMap[entry.feed.id]) {
+            author.avatar = iconMap[entry.feed.id];
+        } else if (entry.feed.site_url) {
             var domain = entry.feed.site_url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
             author.avatar = "https://icons.duckduckgo.com/ip3/" + domain + ".ico";
         }
@@ -260,21 +291,57 @@ function load() {
             var data = JSON.parse(response);
             console.log("Received " + data.total + " unread articles");
 
-            var items = [];
-            if (data.entries && data.entries.length > 0) {
-                for (var i = 0; i < data.entries.length; i++) {
-                    var entry = data.entries[i];
-                    var item = convertEntryToItem(entry);
-                    items.push(item);
+            if (!data.entries || data.entries.length === 0) {
+                setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
+                processResults([]);
+                return;
+            }
+
+            // Collect unique feed IDs that have icons
+            var feedIconIds = {};
+            for (var i = 0; i < data.entries.length; i++) {
+                var feed = data.entries[i].feed;
+                if (feed && feed.icon && feed.icon.icon_id && !feedIconIds[feed.id]) {
+                    feedIconIds[feed.id] = feed.icon.icon_id;
                 }
             }
 
-            // Save fetch timestamp for next load
-            setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
+            // Fetch all feed icons
+            var baseUrl = site.replace(/\/$/, "");
+            var iconFeedIds = Object.keys(feedIconIds);
+            var iconPromises = [];
+            for (var j = 0; j < iconFeedIds.length; j++) {
+                var feedId = iconFeedIds[j];
+                var iconId = feedIconIds[feedId];
+                iconPromises.push(
+                    fetchFeedIcon(baseUrl, feedId, iconId)
+                );
+            }
 
-            console.log("Converted " + items.length + " items");
-            console.log("Calling processResults with " + items.length + " items");
-            processResults(items);
+            return Promise.all(iconPromises).then(function(iconResults) {
+                // Build icon map: feedId -> data URI
+                var iconMap = {};
+                for (var k = 0; k < iconResults.length; k++) {
+                    if (iconResults[k]) {
+                        iconMap[iconResults[k].feedId] = iconResults[k].dataUri;
+                    }
+                }
+                console.log("Fetched " + Object.keys(iconMap).length + " feed icons");
+
+                // Convert entries to items
+                var items = [];
+                for (var m = 0; m < data.entries.length; m++) {
+                    var item = convertEntryToItem(data.entries[m], iconMap);
+                    items.push(item);
+                }
+
+                // Save fetch timestamp for next load
+                setItem("lastFetchTime", Math.floor(Date.now() / 1000).toString());
+
+                console.log("Converted " + items.length + " items");
+                console.log("Calling processResults with " + items.length + " items");
+                processResults(items);
+            });
         })
         .catch(function(error) {
             console.log("Error in load(): " + error);
