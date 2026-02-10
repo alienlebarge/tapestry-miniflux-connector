@@ -29,18 +29,19 @@ function getAuthHeaders() {
  * Builds the Miniflux API URL for fetching entries
  *
  * @param {number} categoryId - Optional category ID to filter by
- * @param {number} publishedAfter - Unix timestamp to filter entries published after this time
+ * @param {number} timestamp - Unix timestamp to filter entries after this time
+ * @param {string} timeParam - The time parameter name ("published_after" or "changed_after")
  * @returns {string} Complete API URL with query parameters
  */
-function buildEntriesUrl(categoryId, publishedAfter) {
+function buildEntriesUrl(categoryId, timestamp, timeParam) {
     // Remove trailing slash from site URL if present
     var baseUrl = site.replace(/\/$/, "");
 
     // Start with base endpoint
     var url = baseUrl + "/v1/entries?status=unread&order=published_at&direction=desc";
 
-    // Add time filter using provided timestamp
-    url += "&published_after=" + publishedAfter;
+    // Add time filter using provided parameter name and timestamp
+    url += "&" + timeParam + "=" + timestamp;
 
     // Add limit parameter (default to 500 if not specified)
     var articleLimit = limit || 500;
@@ -287,19 +288,22 @@ function load() {
 
     // Get last fetch timestamp to determine time window
     var lastFetchTime = getItem("lastFetchTime");
-    var publishedAfter;
+    var timestamp;
+    var timeParam;
 
     if (!lastFetchTime) {
-        // First load: 7 days back
-        publishedAfter = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
-        console.log("Initial fetch: looking back 7 days");
+        // First load: 7 days back, use published_after
+        timestamp = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+        timeParam = "published_after";
+        console.log("Initial fetch: looking back 7 days (published_after)");
     } else {
-        // Subsequent loads: 4 hours back
-        publishedAfter = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
-        console.log("Subsequent fetch: looking back 4 hours");
+        // Subsequent loads: 4 hours back, use changed_after for multi-device sync
+        timestamp = Math.floor(Date.now() / 1000) - (4 * 60 * 60);
+        timeParam = "changed_after";
+        console.log("Subsequent fetch: looking back 4 hours (changed_after)");
     }
 
-    var url = buildEntriesUrl(categoryId, publishedAfter);
+    var url = buildEntriesUrl(categoryId, timestamp, timeParam);
     console.log("Fetching from: " + url);
 
     sendRequest(url, "GET", null, getAuthHeaders())
