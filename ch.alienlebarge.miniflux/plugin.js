@@ -345,7 +345,20 @@ function load() {
         })
         .catch(function(error) {
             console.log("Error in load(): " + error);
-            processError("Failed to load articles: " + error);
+
+            if (error.message && error.message.includes("401")) {
+                raiseCondition("authorize",
+                    "Authentication Failed",
+                    "Your API token is invalid or expired. Please re-enter your credentials."
+                );
+            } else if (error.message && error.message.includes("404")) {
+                raiseCondition("disable",
+                    "Instance Not Found",
+                    "The Miniflux instance URL appears to be incorrect or the server is no longer available."
+                );
+            } else {
+                processError("Failed to load articles: " + error);
+            }
         });
 }
 
@@ -400,6 +413,12 @@ function performAction(actionId, actionValue, item) {
         })
         .catch(function(error) {
             console.log("Failed to mark article as " + newStatus + ": " + error.message);
+            if (error.message && error.message.includes("401")) {
+                raiseCondition("authorize",
+                    "Authentication Failed",
+                    "Your API token is invalid or expired. Please re-enter your credentials."
+                );
+            }
             return Promise.resolve();
         });
     }
@@ -433,6 +452,12 @@ function performAction(actionId, actionValue, item) {
         })
         .catch(function(error) {
             console.log("Failed to toggle bookmark: " + error.message);
+            if (error.message && error.message.includes("401")) {
+                raiseCondition("authorize",
+                    "Authentication Failed",
+                    "Your API token is invalid or expired. Please re-enter your credentials."
+                );
+            }
             return Promise.resolve();
         });
     }
