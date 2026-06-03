@@ -1,5 +1,5 @@
 {
-  "id": "ch.alienlebarge.miniflux",
+  "id": "io.davlin.news",
   "display_name": "Miniflux",
   "icon": "https://raw.githubusercontent.com/miniflux/logo/master/optimized/icon-120.png",
   "site_prompt": "Miniflux Instance URL",

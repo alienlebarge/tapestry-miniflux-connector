@@ -8,7 +8,7 @@ This is a Tapestry connector that integrates Miniflux RSS reader into the Tapest
 
 ### Connector Structure
 ```
-ch.alienlebarge.miniflux/
+io.davlin.news/
 ├── plugin-config.json    # Connector metadata (id, display_name, check_interval, item_style)
 ├── ui-config.json         # User configuration inputs (apiToken, limit)
 ├── plugin.js              # Main connector logic with required functions
@@ -16,7 +16,7 @@ ch.alienlebarge.miniflux/
 └── README.md              # Detailed user documentation
 ```
 
-**Important**: The folder name (`ch.alienlebarge.miniflux`) MUST match the `id` field in `plugin-config.json`.
+**Important**: The folder name (`io.davlin.news`) MUST match the `id` field in `plugin-config.json`.
 
 ### Configuration Variables
 
@@ -141,13 +141,15 @@ if (entry.enclosures && entry.enclosures.length > 0) {
     - First load uses `published_after` (7 days back), subsequent loads use `changed_after` (4 hours back) for better multi-device sync
     - `limit`: Maximum number of entries to fetch (default: 500)
   - `PUT /v1/entries` - Update entry status
-    - Body: `{ "entry_ids": [id], "status": "read" }` or `{ "entry_ids": [id], "status": "unread" }`
-  - `PUT /v1/entries/{id}/bookmark` - Toggle star/bookmark status
+    - Body (JSON): `{ "entry_ids": [id], "status": "read" }` or `{ "entry_ids": [id], "status": "unread" }`
+    - **Must be passed to `sendRequest` as a string** via `JSON.stringify(...)` — Tapestry does NOT serialize objects for you (see Tapestry API note below).
+  - `PUT /v1/entries/{id}/bookmark` - Toggle star/bookmark status (no body)
 
 ### Tapestry API
 - Follow ECMA-262 specification (standard JavaScript only)
 - No DOM or browser APIs available
-- Use `sendRequest(url, method, body, headers)` for HTTP calls
+- Use `sendRequest(url, method, parameters, extraHeaders, fullResponse)` for HTTP calls
+  - Official signature: `parameters` is the request body and **must be a `String`** (e.g. `JSON.stringify(obj)` for a JSON body, or a form-encoded string like `"foo=1&bar=2"`). Passing a raw JS object does NOT work — Tapestry will not serialize it, so the server receives a malformed/empty body. This is the classic reason a `PUT`/`POST` action silently fails.
   - Returns a Promise that resolves with the response body as a string
   - Parse JSON with `JSON.parse(response)`
 - Variables from `ui-config.json` are pre-populated as global variables
@@ -156,12 +158,16 @@ if (entry.enclosures && entry.enclosures.length > 0) {
 - Call `processResults(items)` to return items from `load()`
 - Call `processVerification(config)` to signal successful verification
 - Call `processError(message)` to signal errors
+- In `performAction()`, you **must** call `actionComplete(results, error)` on every path:
+  - Success: `actionComplete(item, null)` (pass the updated item)
+  - Failure: `actionComplete(null, error)`
+  - Only one action per feed runs at a time — skipping `actionComplete` leaves the queue stuck and blocks all later actions.
 
 ## Development Workflow
 
 ### Local Testing
 1. Use **Tapestry Loom** on Mac for development
-2. Edit files in `ch.alienlebarge.miniflux/`
+2. Edit files in `io.davlin.news/`
 3. Press **Cmd-R** to reload connector
 4. Press **Load** button to test execution
 
@@ -175,12 +181,12 @@ if (entry.enclosures && entry.enclosures.length > 0) {
    git push origin v1.x.x
    ```
 2. Create a GitHub release using the tag
-3. Workflow automatically builds `ch.alienlebarge.miniflux.tapestry` and attaches it to the release
+3. Workflow automatically builds `io.davlin.news.tapestry` and attaches it to the release
 
 Manual package creation (if needed):
 ```bash
-cd ch.alienlebarge.miniflux
-zip -r ../ch.alienlebarge.miniflux.tapestry .
+cd io.davlin.news
+zip -r ../io.davlin.news.tapestry .
 ```
 
 ## Code Conventions
@@ -244,7 +250,7 @@ Check your current branch with `git branch --show-current` before making changes
 ## Documentation Maintenance
 
 ### Important: README vs Code Defaults
-Be aware that the user-facing README (`ch.alienlebarge.miniflux/README.md`) may show different defaults than what's in the code:
+Be aware that the user-facing README (`io.davlin.news/README.md`) may show different defaults than what's in the code:
 - **README currently states**: Default limit is 10 articles
 - **Actual default in ui-config.json**: 500 articles
 
@@ -374,9 +380,9 @@ sendRequest(url, "GET", null, getAuthHeaders())
 ## Critical Guardrails
 
 1. **Never commit `.tapestry` package files** - They are build artifacts (see `.gitignore`)
-2. **Folder name must match plugin ID** - `ch.alienlebarge.miniflux` everywhere
+2. **Folder name must match plugin ID** - `io.davlin.news` everywhere
 3. **Test authentication in `verify()`** - Always check credentials before fetching data
-4. **Use reverse domain notation** - Follow `ch.alienlebarge.miniflux` pattern
+4. **Use reverse domain notation** - Follow `io.davlin.news` pattern
 5. **No ES6+ syntax** - Stick to ES5 for Tapestry compatibility
 6. **Identity API required** - Always use `Identity.createWithName()` for author/source
 7. **Never assign undefined** - Use conditional checks before assigning properties
@@ -396,7 +402,7 @@ tapestry-miniflux-connector/
 ├── LICENSE                       # MIT License
 ├── CLAUDE.md                     # This file - AI assistant instructions
 ├── README.md                     # User-facing project documentation
-└── ch.alienlebarge.miniflux/     # Main connector folder
+└── io.davlin.news/     # Main connector folder
     ├── plugin-config.json        # Connector metadata and settings
     ├── ui-config.json            # User input configuration
     ├── plugin.js                 # Main JavaScript implementation

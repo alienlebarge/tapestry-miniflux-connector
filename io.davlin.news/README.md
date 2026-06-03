@@ -20,19 +20,19 @@ Read your unread articles from Miniflux directly in your Tapestry timeline.
 
 ### Quick Installation (Recommended)
 
-If you have the `ch.alienlebarge.miniflux.tapestry` file:
+If you have the `io.davlin.news.tapestry` file:
 
 1. Save the file to your iPhone/iPad (e.g., in the Files app)
 2. Open **Tapestry** on your device
 3. Go to **Settings** → **Connectors**
 4. Tap **Add a Connector**
-5. Select the `ch.alienlebarge.miniflux.tapestry` file
+5. Select the `io.davlin.news.tapestry` file
 6. Configure your Miniflux instance details
 
 ### Manual Installation (For Development)
 
 1. Download or clone this repository
-2. Copy the `ch.alienlebarge.miniflux` folder to your Tapestry Connectors directory
+2. Copy the `io.davlin.news` folder to your Tapestry Connectors directory
 3. In Tapestry, go to Settings > Connectors
 4. Add a new "Miniflux" connector
 5. Configure your Miniflux instance details

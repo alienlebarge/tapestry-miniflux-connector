@@ -404,10 +404,10 @@ function performAction(actionId, actionValue, item) {
         var updateUrl = baseUrl + "/v1/entries";
         var newStatus = (actionId === "mark_as_read") ? "read" : "unread";
 
-        var requestBody = {
+        var requestBody = JSON.stringify({
             entry_ids: [entryId],
             status: newStatus
-        };
+        });
 
         return sendRequest(updateUrl, "PUT", requestBody, getAuthHeaders())
         .then(function(response) {
@@ -427,7 +427,7 @@ function performAction(actionId, actionValue, item) {
                 newActions["unstar"] = actionValue;
             }
             item.actions = newActions;
-            actionComplete(item);
+            actionComplete(item, null);
 
             return response;
         })
@@ -439,7 +439,9 @@ function performAction(actionId, actionValue, item) {
                     "Your API token is invalid or expired. Please re-enter your credentials."
                 );
             }
-            return Promise.resolve();
+            // Must always signal completion, otherwise the feed's action
+            // queue stays blocked (only one action per feed runs at a time)
+            actionComplete(null, error);
         });
     }
 
@@ -466,7 +468,7 @@ function performAction(actionId, actionValue, item) {
                 newActions["mark_as_unread"] = actionValue;
             }
             item.actions = newActions;
-            actionComplete(item);
+            actionComplete(item, null);
 
             return response;
         })
@@ -478,11 +480,13 @@ function performAction(actionId, actionValue, item) {
                     "Your API token is invalid or expired. Please re-enter your credentials."
                 );
             }
-            return Promise.resolve();
+            // Must always signal completion to unblock the feed's action queue
+            actionComplete(null, error);
         });
     }
 
     // Unknown action
     console.log("Unknown action: " + actionId);
+    actionComplete(null, new Error("Unknown action: " + actionId));
     return Promise.resolve();
 }
