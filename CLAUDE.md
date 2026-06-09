@@ -81,6 +81,12 @@ if (entry.feed && entry.feed.title) {
     }
 
     item.source = source;
+
+    // Add category as annotation if available
+    if (entry.feed.category && entry.feed.category.title) {
+        var annotation = Annotation.createWithText(entry.feed.category.title);
+        item.annotations = [annotation];
+    }
 }
 
 // Add actions using actions dictionary
@@ -153,9 +159,11 @@ if (entry.enclosures && entry.enclosures.length > 0) {
 - Variables from `ui-config.json` are pre-populated as global variables
 - Use `Item.createWithUriDate(uri, date)` to create timeline items
 - Use `Identity.createWithName(name)` to create author/source objects
+- Use `Annotation.createWithText(text)` to attach contextual metadata (e.g. categories) to items via `item.annotations`
 - Call `processResults(items)` to return items from `load()`
 - Call `processVerification(config)` to signal successful verification
 - Call `processError(message)` to signal errors
+- Call `actionComplete(item, null)` after a successful action (two arguments required per v1.4+)
 
 ## Development Workflow
 
@@ -220,7 +228,7 @@ Check your current branch with `git branch --show-current` before making changes
 - **Item Style**: Uses `"post"` style in `plugin-config.json` for better timeline presentation
 - **Feed Favicon**: Displays feed favicons as author avatars using DuckDuckGo icon service
 - **Author Display**: Shows feed name as author (not article author) for better feed recognition
-- **Category Support**: Displays Miniflux categories when available
+- **Category Support**: Displays Miniflux categories as `Annotation` objects
 
 ### Performance Optimizations
 - **Adaptive Time Window**: Uses smart time filtering (7 days on first load, 4 hours on subsequent loads)

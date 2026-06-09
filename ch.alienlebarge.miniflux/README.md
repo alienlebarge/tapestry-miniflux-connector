@@ -59,7 +59,7 @@ If you have the `ch.alienlebarge.miniflux.tapestry` file:
 
 - **Number of articles to fetch**: Maximum number of unread articles to retrieve
   - Default: 500
-  - Note: Only articles from the last 30 days are fetched for performance
+  - Note: On first load, articles from the last 7 days are fetched. Subsequent loads look back 4 hours to capture changes made on other devices.
 
 ## How It Works
 
@@ -82,7 +82,7 @@ Each article displays:
 
 - **Title**: The article headline
 - **Date**: Publication date
-- **Author**: Article author (if available)
+- **Author**: The RSS feed name (with favicon)
 - **Content**: Full HTML content from the feed
 - **Source**: The RSS feed name and website
 - **Category**: The Miniflux category (if assigned)
@@ -129,7 +129,8 @@ This connector uses the following Miniflux API endpoints:
 
 - `GET /v1/me` - Verify authentication
 - `GET /v1/entries` - Fetch unread articles (supports `category_id` filter)
-- `PUT /v1/entries` - Mark articles as read
+- `PUT /v1/entries` - Mark articles as read or unread
+- `PUT /v1/entries/{id}/bookmark` - Toggle star/bookmark status
 
 For more information, see the [Miniflux API Documentation](https://miniflux.app/docs/api.html).
 
@@ -176,9 +177,12 @@ For issues or questions:
 
 ## Version History
 
-### Development (In Progress)
+### Latest
 
-- X-Auth-Token authentication with API token
-- Fetch unread articles
-- Mark as read action
+- Categories displayed as annotations
+- Star/Unstar (bookmark) action
+- Feed favicons as author avatars (native Miniflux icons + DuckDuckGo fallback)
+- Adaptive time window (7 days on first load, 4 hours on subsequent loads)
+- Mark as Read / Mark as Unread toggle
 - Full HTML content support
+- X-Auth-Token authentication with API token
