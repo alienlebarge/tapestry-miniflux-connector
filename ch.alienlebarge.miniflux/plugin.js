@@ -130,9 +130,10 @@ function convertEntryToItem(entry, iconMap) {
 
         item.source = source;
 
-        // Add category if available
+        // Add category as annotation if available
         if (entry.feed.category && entry.feed.category.title) {
-            item.category = entry.feed.category.title;
+            var annotation = Annotation.createWithText(entry.feed.category.title);
+            item.annotations = [annotation];
         }
     }
 
@@ -427,7 +428,7 @@ function performAction(actionId, actionValue, item) {
                 newActions["unstar"] = actionValue;
             }
             item.actions = newActions;
-            actionComplete(item);
+            actionComplete(item, null);
 
             return response;
         })
@@ -466,7 +467,7 @@ function performAction(actionId, actionValue, item) {
                 newActions["mark_as_unread"] = actionValue;
             }
             item.actions = newActions;
-            actionComplete(item);
+            actionComplete(item, null);
 
             return response;
         })
